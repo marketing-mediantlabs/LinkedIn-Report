@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Mediant Labs — LinkedIn Analytics Report</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--g:#21a866;--b:#2189bd;--n:#173661;--o:#e07b2a;--p:#9b59b6;--r:#e74c3c;
+--bg:#0f1117;--s:#181c27;--s2:#1e2335;--br:#2a3047;--tx:#f0f2f8;--sub:#8b93b0;
+--gg:rgba(33,168,102,.15);--bg2:rgba(33,137,189,.15);}
+body.light{--bg:#f3f5f9;--s:#fff;--s2:#eef1f7;--br:#dde2ee;--tx:#0c0c0c;--sub:#5a6280;--gg:rgba(33,168,102,.08);--bg2:rgba(33,137,189,.08);}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;transition:background .3s,color .3s;}
+
+/* HEADER */
+header{background:var(--s);border-bottom:1px solid var(--br);padding:12px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;}
+.logo img{height:32px;}
+.hright{display:flex;align-items:center;gap:12px;}
+.rbadge{background:linear-gradient(135deg,var(--g),var(--b));color:#fff;font-size:10px;font-weight:700;letter-spacing:1px;padding:4px 12px;border-radius:20px;text-transform:uppercase;}
+.tbtn{background:var(--s2);border:1px solid var(--br);color:var(--tx);padding:6px 13px;border-radius:8px;cursor:pointer;font-size:12px;}
+.tbtn:hover{border-color:var(--g);}
+
+/* NAV TABS */
+.tabs{background:var(--s);border-bottom:1px solid var(--br);display:flex;gap:0;padding:0 28px;overflow-x:auto;}
+.tab{padding:12px 18px;font-size:12px;font-weight:600;color:var(--sub);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s;}
+.tab:hover{color:var(--tx);}
+.tab.active{color:var(--g);border-bottom-color:var(--g);}
+
+/* PAGES */
+.page{display:none;max-width:1320px;margin:0 auto;padding:28px 22px 60px;}
+.page.active{display:block;}
+
+/* PAGE TITLE */
+.ptitle{margin-bottom:24px;}
+.ptitle h1{font-size:21px;font-weight:700;}
+.ptitle p{color:var(--sub);font-size:12px;margin-top:3px;}
+.ptitle .period{display:inline-block;margin-top:6px;background:var(--s);border:1px solid var(--br);padding:4px 12px;border-radius:16px;font-size:11px;color:var(--sub);}
+
+/* KPI */
+.kgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:12px;margin-bottom:24px;}
+.kcard{background:var(--s);border:1px solid var(--br);border-radius:13px;padding:16px 18px;position:relative;overflow:hidden;transition:transform .2s;}
+.kcard:hover{transform:translateY(-2px);}
+.kcard::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--g),var(--b));}
+.kcard.kb::before{background:linear-gradient(90deg,var(--b),#5ec7f5);}
+.kcard.ko::before{background:linear-gradient(90deg,var(--o),#f5b942);}
+.kcard.kp::before{background:linear-gradient(90deg,var(--p),#c39bd3);}
+.kcard.kr::before{background:linear-gradient(90deg,var(--r),#f1948a);}
+.klbl{font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--sub);margin-bottom:7px;}
+.kval{font-size:28px;font-weight:800;color:var(--tx);line-height:1;}
+.ksub{font-size:10px;color:var(--sub);margin-top:4px;}
+.kbadge{display:inline-block;padding:2px 7px;border-radius:8px;font-size:9px;font-weight:600;margin-top:6px;}
+.bg{background:var(--gg);color:var(--g);border:1px solid rgba(33,168,102,.3);}
+.bb{background:var(--bg2);color:var(--b);border:1px solid rgba(33,137,189,.3);}
+
+/* SECTION HEAD */
+.sec{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--sub);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.sec::after{content:'';flex:1;height:1px;background:var(--br);}
+
+/* CARDS */
+.row{display:grid;gap:16px;margin-bottom:20px;}
+.c2{grid-template-columns:1fr 1fr;}
+.c3{grid-template-columns:1fr 1fr 1fr;}
+.c31{grid-template-columns:2fr 1fr;}
+.c13{grid-template-columns:1fr 2fr;}
+@media(max-width:860px){.c2,.c3,.c31,.c13{grid-template-columns:1fr;}}
+.card{background:var(--s);border:1px solid var(--br);border-radius:13px;padding:18px 20px;}
+.card h3{font-size:12px;font-weight:700;color:var(--tx);margin-bottom:2px;}
+.card p.csub{font-size:10px;color:var(--sub);margin-bottom:14px;}
+.cht{position:relative;}
+.h3{height:280px;}.h2{height:240px;}.h1{height:200px;}.h4{height:320px;}
+
+/* TABLE */
+.tcard{background:var(--s);border:1px solid var(--br);border-radius:13px;overflow:hidden;margin-bottom:20px;}
+.thead{padding:14px 18px 10px;border-bottom:1px solid var(--br);}
+.thead h3{font-size:12px;font-weight:700;}
+.thead p{font-size:10px;color:var(--sub);margin-top:2px;}
+table{width:100%;border-collapse:collapse;}
+th{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--sub);padding:8px 16px;text-align:left;background:var(--s2);}
+td{padding:8px 16px;font-size:11px;border-top:1px solid var(--br);color:var(--tx);}
+tr:hover td{background:var(--s2);}
+.barc{display:flex;align-items:center;gap:8px;}
+.mbar{height:5px;border-radius:3px;background:linear-gradient(90deg,var(--g),var(--b));}
+.mbar.blue{background:linear-gradient(90deg,var(--b),#5ec7f5);}
+.pct{font-size:9px;color:var(--sub);min-width:32px;text-align:right;}
+.rnk{width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;}
+.r1{background:rgba(255,196,0,.15);color:#ffc400;}.r2{background:rgba(180,180,180,.15);color:#b4b4b4;}.r3{background:rgba(184,115,51,.15);color:#b87333;}.rn{background:var(--s2);color:var(--sub);}
+
+/* PILLS */
+.pills{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px;}
+.pill{display:inline-flex;align-items:center;gap:5px;background:var(--s2);border:1px solid var(--br);padding:4px 9px;border-radius:14px;font-size:10px;color:var(--sub);}
+.dot{width:6px;height:6px;border-radius:50%;}
+
+/* IBOX */
+.ibox{background:var(--s2);border:1px solid var(--br);border-radius:9px;padding:10px 12px;margin-bottom:9px;}
+.ibox .it{font-size:10px;color:var(--sub);margin-bottom:3px;}
+.ibox .iv{font-size:11px;color:var(--tx);line-height:1.5;}
+
+/* COMPETITOR ROW */
+.comp-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:20px;}
+.comp-card{background:var(--s);border:1px solid var(--br);border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;}
+.comp-card.highlight::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--g),var(--b));}
+.comp-name{font-size:10px;font-weight:700;color:var(--tx);margin-bottom:6px;line-height:1.3;}
+.comp-val{font-size:22px;font-weight:800;color:var(--tx);line-height:1;}
+.comp-sub{font-size:9px;color:var(--sub);margin-top:3px;}
+
+/* POST TYPE BADGE */
+.ptype{display:inline-block;padding:2px 7px;border-radius:5px;font-size:9px;font-weight:600;}
+.pt-tl{background:rgba(33,168,102,.15);color:var(--g);}
+.pt-eb{background:rgba(33,137,189,.15);color:var(--b);}
+.pt-wa{background:rgba(155,89,182,.15);color:var(--p);}
+.pt-em{background:rgba(230,126,34,.15);color:var(--o);}
+.pt-jo{background:rgba(231,76,60,.15);color:var(--r);}
+.pt-wi{background:rgba(241,196,15,.15);color:#f1c40f;}
+
+footer{text-align:center;padding:20px;color:var(--sub);font-size:10px;border-top:1px solid var(--br);}
+footer span{color:var(--g);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><img id="logo-img" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2ZXJzaW9uPSIxLjEiIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2aWV3Qm94PSIwIDAgMjEyLjA5IDU5LjU3Ij4KICA8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMzAuNS4xLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogMi4xLjQgQnVpbGQgMykgIC0tPgogIDxkZWZzPgogICAgPHN0eWxlPgogICAgICAuc3QwIHsKICAgICAgICBmaWxsOiAjZmZmZmZmOwogICAgICB9CgogICAgICAuc3QxIHsKICAgICAgICBmaWxsOiAjZmZmZmZmOwogICAgICB9CgogICAgICAuc3QyIHsKICAgICAgICBmaWxsOiBub25lOwogICAgICB9CgogICAgICAuc3QzIHsKICAgICAgICBjbGlwLXBhdGg6IHVybCgjY2xpcHBhdGgpOwogICAgICB9CiAgICA8L3N0eWxlPgogICAgPGNsaXBQYXRoIGlkPSJjbGlwcGF0aCI+CiAgICAgIDxwb2x5Z29uIGNsYXNzPSJzdDIiIHBvaW50cz0iMzIuNzYgMTMuMjEgOS44OCA0Ni45OSA3MC44NyA0Ni45OSA0OC40NCAxMy4yMSAzNC40NiAzNC43MyA0NS42NiAzNC43MyA0OS4xNCAyOS4yNyA1NS45OCAzOS4wOSAyNS44MyAzOS4wOSAzOC4yNyAyMC45NSAzMi43NiAxMy4yMSIvPgogICAgPC9jbGlwUGF0aD4KICA8L2RlZnM+CiAgPGc+CiAgICA8cGF0aCBjbGFzcz0ic3QxIiBkPSJNNzguMSwzMC45NFYxMy4yMWgzLjM5bDcuNTQsMTIuNTFoLTEuOGw3LjQyLTEyLjUxaDMuMzdsLjA1LDE3LjcyaC0zLjg1bC0uMDItMTEuODJoLjcxbC01LjkyLDkuOTVoLTEuODVsLTYuMDUtOS45NWguODZ2MTEuODJoLTMuODVaIi8+CiAgICA8cGF0aCBjbGFzcz0ic3QxIiBkPSJNMTAyLjI4LDMwLjk0VjEzLjIxaDEzLjM5djMuMjloLTkuMzJ2MTEuMTRoOS42NXYzLjI5aC0xMy43MlpNMTA2LjA1LDIzLjU0di0zLjE5aDguNTN2My4xOWgtOC41M1oiLz4KICAgIDxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik0xMTkuMjcsMzAuOTRWMTMuMjFoOC4wNWMxLjkyLDAsMy42Mi4zNyw1LjA5LDEuMXMyLjYyLDEuNzYsMy40NCwzLjA4LDEuMjQsMi44OCwxLjI0LDQuNjgtLjQxLDMuMzUtMS4yNCw0LjY3Yy0uODMsMS4zMy0xLjk3LDIuMzUtMy40NCwzLjA5cy0zLjE2LDEuMS01LjA5LDEuMWgtOC4wNVpNMTIzLjM3LDI3LjU3aDMuNzVjMS4xOCwwLDIuMjEtLjIyLDMuMDgtLjY3Ljg3LS40NSwxLjU0LTEuMDgsMi4wMy0xLjkxcy43Mi0xLjguNzItMi45MS0uMjQtMi4xLS43Mi0yLjkyLTEuMTYtMS40NS0yLjAzLTEuOS0xLjg5LS42Ny0zLjA4LS42N2gtMy43NXYxMC45OVoiLz4KICAgIDxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik0xNDAuMTgsMzAuOTRWMTMuMjFoNC4xdjE3LjcyaC00LjFaIi8+CiAgICA8cGF0aCBjbGFzcz0ic3QxIiBkPSJNMTQ2LjE1LDMwLjk0bDcuOS0xNy43Mmg0LjA1bDcuOTIsMTcuNzJoLTQuM2wtNi40OC0xNS42NWgxLjYybC02LjUxLDE1LjY1aC00LjJaTTE1MC4xLDI3LjE0bDEuMDktMy4xMWg5LjExbDEuMTEsMy4xMWgtMTEuMzJaIi8+CiAgICA8cGF0aCBjbGFzcz0ic3QxIiBkPSJNMTY3Ljg3LDMwLjk0VjEzLjIxaDMuMzlsMTAuNDYsMTIuNzZoLTEuNjV2LTEyLjc2aDQuMDV2MTcuNzJoLTMuMzdsLTEwLjQ4LTEyLjc2aDEuNjV2MTIuNzZoLTQuMDVaIi8+CiAgICA8cGF0aCBjbGFzcz0ic3QxIiBkPSJNMTkyLDMwLjk0di0xNC4zOGgtNS42N3YtMy4zNGgxNS40NHYzLjM0aC01LjY3djE0LjM4aC00LjFaIi8+CiAgPC9nPgogIDxnPgogICAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTc4LjEsNDYuOTl2LTEwLjI2aDEuNDd2OC45OWg1LjU2djEuMjhoLTcuMDJaIi8+CiAgICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNODUuMjUsNDYuOTlsNC42NS0xMC4yNmgxLjQ1bDQuNjYsMTAuMjZoLTEuNTRsLTQuMTUtOS40NGguNTlsLTQuMTUsOS40NGgtMS41MVpNODcuMjMsNDQuNDNsLjQtMS4xN2g1Ljc4bC40MiwxLjE3aC02LjZaIi8+CiAgICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNOTcuNTQsNDYuOTl2LTEwLjI2aDQuNmMxLjE4LDAsMi4wOS4yNCwyLjczLjcxLjYzLjQ3Ljk1LDEuMTIuOTUsMS45NCwwLC41Ni0uMTIsMS4wMy0uMzcsMS40MXMtLjU4LjY3LTEsLjg4Yy0uNDIuMjEtLjg3LjMxLTEuMzYuMzFsLjI2LS40NGMuNTksMCwxLjEuMSwxLjU1LjMxLjQ1LjIxLjgxLjUxLDEuMDcuOS4yNi40LjQuODkuNCwxLjQ3LDAsLjg4LS4zMywxLjU2LS45OSwyLjA1LS42Ni40OC0xLjY0LjczLTIuOTQuNzNoLTQuOVpNOTksNDUuODFoMy4zN2MuODEsMCwxLjQzLS4xNCwxLjg2LS40MS40My0uMjcuNjUtLjcuNjUtMS4yOXMtLjIyLTEuMDMtLjY1LTEuMy0xLjA1LS40MS0xLjg2LS40MWgtMy41di0xLjE5aDMuMTRjLjc0LDAsMS4zMi0uMTQsMS43My0uNDEuNDEtLjI3LjYyLS42OC42Mi0xLjIzcy0uMjEtLjk2LS42Mi0xLjIzYy0uNDEtLjI3LS45OS0uNDEtMS43My0uNDFoLTN2Ny44OVoiLz4KICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0xMTEuNjMsNDcuMTFjLS43OCwwLTEuNTMtLjEyLTIuMjQtLjM2LS43MS0uMjQtMS4yOC0uNTUtMS42OS0uOTNsLjU0LTEuMTRjLjM5LjM0Ljg5LjYzLDEuNS44NS42MS4yMywxLjI0LjM0LDEuODkuMzQuNiwwLDEuMDgtLjA3LDEuNDUtLjIxcy42NS0uMzMuODItLjU2Yy4xOC0uMjQuMjYtLjUxLjI2LS44MSwwLS4zNS0uMTItLjY0LS4zNC0uODVzLS41My0uMzktLjg5LS41MmMtLjM3LS4xMy0uNzctLjI1LTEuMjEtLjM0LS40NC0uMS0uODgtLjIxLTEuMzMtLjM0LS40NC0uMTMtLjg1LS4zLTEuMjItLjUxLS4zNy0uMjEtLjY2LS40OC0uODktLjgzLS4yMi0uMzUtLjM0LS43OS0uMzQtMS4zNHMuMTQtMS4wMS40Mi0xLjQ2Yy4yOC0uNDQuNzEtLjgsMS4yOS0xLjA3LjU4LS4yNywxLjMyLS40LDIuMjItLjQuNiwwLDEuMTkuMDgsMS43Ny4yMy41OS4xNiwxLjA5LjM4LDEuNTIuNjdsLS40OCwxLjE3Yy0uNDQtLjI5LS45LS41MS0xLjM5LS42NC0uNDktLjEzLS45Ni0uMi0xLjQyLS4yLS41OCwwLTEuMDUuMDctMS40Mi4yMi0uMzcuMTUtLjY0LjM0LS44MS41OS0uMTcuMjQtLjI2LjUyLS4yNi44MiwwLC4zNi4xMi42NS4zNC44Ni4yMy4yMi41My4zOS44OS41MS4zNy4xMy43Ny4yNCwxLjIxLjM0LjQ0LjEuODguMjIsMS4zMy4zNC40NC4xMy44NS4yOSwxLjIyLjUuMzcuMjEuNjYuNDguODkuODJzLjM0Ljc4LjM0LDEuMzItLjE0LDEtLjQyLDEuNDQtLjcyLjgtMS4zMSwxLjA3Yy0uNTkuMjctMS4zNC40LTIuMjQuNFoiLz4KICA8L2c+CiAgPGcgY2xhc3M9InN0MyI+CiAgICA8aW1hZ2Ugd2lkdGg9IjY1IiBoZWlnaHQ9IjM4IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg3Ljg4IDExLjIxKSIgeGxpbms6aHJlZj0iZGF0YTppbWFnZS9wbmc7YmFzZTY0LGlWQk9SdzBLR2dvQUFBQU5TVWhFVWdBQUFFSUFBQUFuQ0FZQUFBQzdiWjRCQUFBQUNYQklXWE1BQUFzU0FBQUxFZ0hTM1g3OEFBQUY4VWxFUVZSb2dlMWEyMjRjUlJBOU5lSkRwajhHSHVBSkhpUHVJUWtHRVhBQUIyUkZpcEFpa2poT1RHNk9jN0VoQ2lCTEtGSVVLUUxsWTNZK3hEUEZRM2QxVmZYTzJydnJHUjZRVzFydGJFOVhkWFhWcWVyVGJRTW43YVRaUm1OUEVLNjlaZ2FqdWZqV3duUFYxMTZ6Q0UwdXZqbXFyZFdZeXV2cmZ6T29BMUdIY1AwZlhsU2VxQU5UQzZaMkRQUDhYR01wcmpkZW1ZVnpucXI1L3UyNTVnd2JyMWlrR0F3dzBLeTlNNXE5b3lHQ3FBWFFncWlEb0lMbWpHeTQ4WklaVVo1SmRZUWJMeGRHMWJ4dEZFZUV6UmZNMUFMeVNRdGl0QWliTDQ1Y0RNUElpaU9yK0QxV0d4eHE5YzNuTEprZ3lwa0JvcGdnWUlDSU1MbndidS9jNGVaekJnak1ERW9qck9jSXdPVENlNFBiUFFJaVdxQktLRWhJUUJXZktVV1djVEJUbXRIRzl3WU5rbUpTUE1PdHZ3WlBrVUVkRWJiMm1hb09CQXZsTHVjNDR5QTZwT29RdHZhbkZoTzI5dGs2UUZPa0F5ZzVDS2wvNERhWUkrcXRQNWdOQ2lJQzJvUUF2NkM4eUVJK0k0QmFVQlUva0NKcmFnVlJHOGNQMkFaekJGV0tncHdDQ1FXVUZ5aU9hTkY4YzhybE9Sa25SZWRaVkdoNk1GcWdpblBVdnp3YnpCbHZES0VrM0huS3pESENWTVZDSjg5Z3pzVXVjZ0pnY3Y0am1pVVBRcXlzWUtlUFNML0JERGJGZUloMmJFU0V1M3NNMkx3K2dOMDJMUXEwK0dtcjcrd3lVdDJJaUZMK3dZNkxHRVFZOUlRN2U0T2dZb0RVYUpPUmJUYldWbmpwUS9yZGZQVkpUMHAwY000a0pWSktzYVZQblNydjZydVBqKzJNWTZWR2ZXK0hHUzBJQko4QStzUmdFQ2p1LzErZTlTbHg3MkZra0psM0VFQXBKWkllRDMraEtDWjFCa3FRcFJGUjM5L09CNm9JWjMxMnJOSWd3N1p3ZjVzeldsTHg0NEl2dURRai82NGNWOS9iUGhZcWxuWkVYclFsVGVtM3dOem0rT1NMRlIrNmdqQUp2OGpiSkhXZ2lsMEtvRWdqUzlKUXRhaTM3eTd0aktWU0l6eTRuU0ZOeHBYeHVKZ3FPNUFnejVpc2ZFMVQ4dHdaR3E0eW5CVFpYWUtBdUJPbE1abXVBemwzanBzZ0N5TWk3TnhpSlRtdHFlSmRKa0JDckpBSWxXMzFneVJmV1NTd0lWbUdoRldxeTQ1UkpPZzhncHF3czdVVUtoWlBqV0lMa3kwdjBtZnRrOC9rM0tyZkpRcW02WDlyZW9palFDMmF6MWNwNmovUWR3VlRKZEx4NGVIbXdzNVl5QkhoMFFibkNLQ012anBCeGt6T2Z1dWNVRCs4emxvTGhFSzNPYkprOUluTzV0eDNCQ0IrbHhUZE90TGNmU3h6RnBuYkVmV2puMWs1Z3g2a0xDckVLS282VE02cyticnc2Q3Jic1hKNFlzU0RHVWlwYzZiaFo5ZDZDeXpqUUUreGxyTlVLaHZ0SGRnUjRja1ZkaEVuUzI0Nmh3NmFGWkhLamszeTZRREZGdVpWUHdNRmdPYk1qNVMzWEl0STUyQkZTdjM0eXR6T21HL1hvQTdDZWpoVmVFdHRwRWxmYy9yU1ZCR2ZuRjRmaFBrMG42MVQvZVFubHQxRXlGZytoeGhMRnRsS2poeGE3MTVtZS9scWhTeWJGSzdYZkhwNTlEOFJBRURZdlp5T2RvWmh5cTV0Y0VBQUpuUFlkR2hxMUh1WDJGNit3cVNEWHNpeVkzNy9XVFBNTlc2dEtTM2NmV2Q4WCs5ZE9qSkZEazBOb2s2UHdDaVFrTzRleS83dzZ6cDdtUG83UndDOTZhUWpaejJMclBSMVdaY2dVK3hCT3Q4c1VpMW5RaWI4OWdNakF4NG1DZnFYb2tacUxSRkJxU2xaVzNHNVcrcTMrcXhjNmFMODdmUlJEcFFjNU9SK3BQbjQ2c3oxOXQ4a1AxM2pyQXpJZERjL1o0K3pUa1FhSzRzSVgxMHdmY2t5bzFtZGlrcHZreHVmblRLTllCM0RhRDdjNkoyMFB6V29kWkVCQWVsaXlIayszejVWSmxybS9NRUtpbVQ4dEQ0aWphMDRPNzkzTmlXQlNsZHQvMHlRVjJmNmM0Zmc4NUJjbWZKT2VMYkt0Z2JFQmJGN1Z0dE1YMXBQaVI1cGZkRzBrZTY3VjdCemlaeERaakdQZGFTMXY5VFhmTEExTlpsbmY3K2ZaNzlvOVd6NUxNdUxCb21oOGs3N2FXcVA3OWZWTjY1OFA5M3ZLMGVmM2ZhMzlXdnovbTJuMGFkR0lrNE1oV3llaXFJMU9mcG1URFRDcUNHQ0hMTmg5VWh0eUJleVBhZ3k5VVBHeW51SGd0eXZ1d2NLR2VNS3lDQ3J3eTFkSHNLZkt4Ymh1bmhuaEViT0wxcFpKcGVLalQ3OU52dENnVGkxUWFQdDZwVWhVRzdiWkl1T09PN3dZZ3cwcDdiekFJT0lWaU9Zc2VWSkpabnZza0RwQzcvZEh0a01MYzV6SmowU0RNY1UwNkpMaDBjVWNBeWF6QzlYLzBZdUIyVFUvd3c1YVNmdGY5UCtCWkx2YWlqNTQ4QnZBQUFBQUVsRlRrU3VRbUNDIi8+CiAgPC9nPgo8L3N2Zz4=" alt="Mediant Labs"></div>
+  <div class="hright">
+    <span class="rbadge">LinkedIn Full Report</span>
+    <div style="display:flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--br);border-radius:8px;padding:5px 12px;">
+      <span style="font-size:10px;color:var(--sub);font-weight:600;text-transform:uppercase;letter-spacing:.6px;">Updated</span>
+      <span style="font-size:12px;font-weight:700;color:var(--tx);">08 July 2026</span>
+    </div>
+    <button class="tbtn" onclick="toggleTheme()">☀️ Light</button>
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('followers')">📈 Followers</div>
+  <div class="tab" onclick="showTab('visitors')">👁 Visitors</div>
+  <div class="tab" onclick="showTab('content')">📝 Content</div>
+  <div class="tab" onclick="showTab('ads')">🎯 Ad Campaigns</div>
+  <div class="tab" onclick="showTab('competitors')">🏆 Competitors</div>
+</div>
+
+<!-- ═══════════════════════════════════ FOLLOWERS ═══════════════════════ -->
+<div id="page-followers" class="page active">
+  <div class="ptitle">
+    <h1>Follower Growth Report</h1>
+    <p>Full organic growth analysis · Apr 1, 2025 – Jun 8, 2026</p>
+    <span class="period">📅 434 days · Starting base: 1,743 followers</span>
+  </div>
+
+  <div class="kgrid">
+    <div class="kcard"><div class="klbl">Total New Followers</div><div class="kval">2,297</div><div class="ksub">Apr 2025 → Jun 2026</div><span class="kbadge bg">434 days</span></div>
+    <div class="kcard"><div class="klbl">Organic</div><div class="kval">2,213</div><div class="ksub">96.3% of all growth</div><span class="kbadge bg">↑ 96.3%</span></div>
+    <div class="kcard kb"><div class="klbl">Auto-Invited</div><div class="kval">84</div><div class="ksub">3.7% of total</div><span class="kbadge bb">3.7%</span></div>
+    <div class="kcard ko"><div class="klbl">Sponsored</div><div class="kval">0</div><div class="ksub">No paid campaigns yet</div><span class="kbadge bb">Opportunity</span></div>
+    <div class="kcard"><div class="klbl">Peak Day</div><div class="kval">110</div><div class="ksub">May 22, 2026</div><span class="kbadge bg">All-time high</span></div>
+    <div class="kcard kb"><div class="klbl">Best Month</div><div class="kval">445</div><div class="ksub">May 2026</div><span class="kbadge bb">Monthly record</span></div>
+    <div class="kcard kp"><div class="klbl">Monthly Avg</div><div class="kval">164</div><div class="ksub">Across 14 months</div><span class="kbadge bb">Avg</span></div>
+  </div>
+
+  <div class="sec">Monthly Growth — Full Timeline</div>
+  <div class="row" style="margin-bottom:20px;">
+    <div class="card"><h3>Monthly New Followers (Apr 2025 – May 2026)</h3><p class="csub">Green = 2025 · Blue = 2026 · Total 2025: 1,016 · Total 2026 YTD: 1,281</p><div class="cht h4"><canvas id="monthlyFollowersChart"></canvas></div></div>
+  </div>
+
+  <div class="sec">Daily Growth — Split View</div>
+  <div class="row c2">
+    <div class="card"><h3>Daily Followers — Apr–Dec 2025</h3><p class="csub">Base-building phase · Notable: Apr 21 (43), May 12 (31), Jun 16/18/27, Oct 10 (50)</p><div class="cht h3"><canvas id="daily2025Chart"></canvas></div></div>
+    <div class="card"><h3>Daily Followers — Jan–Jun 2026</h3><p class="csub">Acceleration phase · Feb 18 (80), Mar 16 (94), Apr 9 (87), May 22 (110)</p><div class="cht h3"><canvas id="daily2026Chart"></canvas></div></div>
+  </div>
+
+  <div class="sec">Follower Audience Profile</div>
+  <div class="row c2">
+    <div class="card"><h3>Seniority Distribution</h3><p class="csub">Senior + Entry dominate at 82% · Decision-makers (Mgr+Dir+VP+CXO) = 17.3%</p><div class="cht h3"><canvas id="fSeniorityChart"></canvas></div></div>
+    <div class="card"><h3>Company Size</h3><p class="csub">Enterprise (10,001+) = 25.4% · Strong mid-market presence</p><div class="cht h3"><canvas id="fCsizeChart"></canvas></div></div>
+  </div>
+
+  <div class="sec">Top Follower Locations</div>
+  <div class="tcard">
+    <div class="thead"><h3>Follower Geography — Top 10</h3><p>40% Chennai · Near-100% India · US/Canada Follower Ads needed for HASQ targeting</p></div>
+    <table><thead><tr><th>#</th><th>Location</th><th>Followers</th><th>Share</th><th>Distribution</th></tr></thead>
+    <tbody id="fLocTable"></tbody></table>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ VISITORS ═══════════════════════ -->
+<div id="page-visitors" class="page">
+  <div class="ptitle">
+    <h1>Page Visitor Report</h1>
+    <p>LinkedIn company page visits · Jun 7, 2025 – Jun 8, 2026</p>
+    <span class="period">📅 365 days · All page views combined</span>
+  </div>
+
+  <div class="kgrid">
+    <div class="kcard"><div class="klbl">Total Page Views</div><div class="kval">15,071</div><div class="ksub">Jun 2025 – Jun 2026</div><span class="kbadge bg">Full year</span></div>
+    <div class="kcard kb"><div class="klbl">Unique Visitors</div><div class="kval">5,586</div><div class="ksub">37% unique visit rate</div><span class="kbadge bb">Unique</span></div>
+    <div class="kcard"><div class="klbl">Best Month PV</div><div class="kval">1,902</div><div class="ksub">April 2026</div><span class="kbadge bg">Peak month</span></div>
+    <div class="kcard kb"><div class="klbl">Best Month UV</div><div class="kval">665</div><div class="ksub">May 2026</div><span class="kbadge bb">Peak visitors</span></div>
+    <div class="kcard ko"><div class="klbl">Avg PV / Month</div><div class="kval">1,159</div><div class="ksub">Excluding partial Jun 26</div><span class="kbadge bb">Monthly avg</span></div>
+    <div class="kcard kp"><div class="klbl">Avg UV / Month</div><div class="kval">430</div><div class="ksub">Monthly unique visitors</div><span class="kbadge bb">Monthly avg</span></div>
+  </div>
+
+  <div class="sec">Monthly Visitor Trend</div>
+  <div class="row">
+    <div class="card"><h3>Monthly Page Views & Unique Visitors</h3><p class="csub">Page views (bars) vs unique visitors (line) · Strong correlation with content activity</p><div class="cht h4"><canvas id="vMonthlyChart"></canvas></div></div>
+  </div>
+
+  <div class="sec">Visitor Audience Profile</div>
+  <div class="row c2">
+    <div class="card"><h3>Top Industries (Visitor Views)</h3><p class="csub">IT Services dominates · HASQ target verticals underrepresented</p><div class="cht h3"><canvas id="vIndustryChart"></canvas></div></div>
+    <div class="card"><h3>Top Job Functions (Visitor Views)</h3><p class="csub">Arts & Design and Education lead — opportunity to shift toward L&D / HR buyers</p><div class="cht h3"><canvas id="vJobChart"></canvas></div></div>
+  </div>
+
+  <div class="row c2">
+    <div class="card"><h3>Visitor Seniority</h3><p class="csub">Senior + Entry = 79% · Manager+Director+VP+CXO = 14% decision-maker layer</p><div class="cht h2"><canvas id="vSeniorityChart"></canvas></div></div>
+    <div class="card"><h3>Visitor Company Size</h3><p class="csub">SMB (51–200) leads visits · Enterprise (10K+) = 20% strong</p><div class="cht h2"><canvas id="vCsizeChart"></canvas></div></div>
+  </div>
+
+  <div class="sec">Top Visitor Locations</div>
+  <div class="tcard">
+    <div class="thead"><h3>Visitor Geography — Top 10</h3><p>Chennai dominates visits too · Austin, TX is the first US metro appearance — positive signal for North America</p></div>
+    <table><thead><tr><th>#</th><th>Location</th><th>Views</th><th>Share</th><th>Distribution</th></tr></thead>
+    <tbody id="vLocTable"></tbody></table>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ CONTENT ═══════════════════════ -->
+<div id="page-content" class="page">
+  <div class="ptitle">
+    <h1>Content Performance Report</h1>
+    <p>81 posts tracked · Mar 2025 – Mar 2026 (PDF) + LinkedIn content export (Jun 2025 – Jun 2026)</p>
+    <span class="period">📅 Total impressions: 254,813 · Reactions: 3,263 · Clicks: 9,070</span>
+  </div>
+
+  <div class="kgrid">
+    <div class="kcard"><div class="klbl">Total Impressions</div><div class="kval">254K</div><div class="ksub">All posts combined</div><span class="kbadge bg">254,813</span></div>
+    <div class="kcard kb"><div class="klbl">Total Clicks</div><div class="kval">9,070</div><div class="ksub">Avg CTR: 3.6%</div><span class="kbadge bb">Clicks</span></div>
+    <div class="kcard"><div class="klbl">Total Reactions</div><div class="kval">3,263</div><div class="ksub">Likes + reactions</div><span class="kbadge bg">Reactions</span></div>
+    <div class="kcard ko"><div class="klbl">Total Comments</div><div class="kval">145</div><div class="ksub">Across all posts</div><span class="kbadge bb">Comments</span></div>
+    <div class="kcard kp"><div class="klbl">Posts Tracked</div><div class="kval">81</div><div class="ksub">Mar 2025 – Mar 2026</div><span class="kbadge bb">PDF report</span></div>
+    <div class="kcard"><div class="klbl">Best Eng. Rate</div><div class="kval">14.1%</div><div class="ksub">Employer Branding posts</div><span class="kbadge bg">Top type</span></div>
+  </div>
+
+  <div class="sec">Monthly Content Performance</div>
+  <div class="row">
+    <div class="card"><h3>Monthly Impressions & Engagement</h3><p class="csub">Impressions (bars) vs Reactions + Clicks combined (line) · Apr spike driven by viral Employer Branding</p><div class="cht h4"><canvas id="cMonthlyChart"></canvas></div></div>
+  </div>
+
+  <!-- ══ MEDIA TYPE DEEP DIVE ══ -->
+  <div class="sec">Media Type — Engagement Deep Dive</div>
+
+  <!-- Score cards per media type -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:20px;">
+    <div class="card" style="border-top:3px solid #21a866;padding:16px 18px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <div style="width:36px;height:36px;background:rgba(33,168,102,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;">🎬</div>
+        <div><div style="font-size:13px;font-weight:700;color:var(--tx)">Video</div><div style="font-size:10px;color:var(--sub)">16 posts · XLS data</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div style="background:var(--s2);border-radius:8px;padding:8px 10px;"><div style="font-size:9px;color:var(--sub)">Avg Impressions</div><div style="font-size:18px;font-weight:800;color:#21a866">1,693</div></div>
+        <div style="background:var(--s2);border-radius:8px;padding:8px 10px;"><div style="font-size:9px;color:var(--sub)">Avg Eng. Rate</div><div style="font-size:18px;font-weight:800;color:#21a866">13.0%</div></div>
+        <div style="background:var(--s2);border-radius:8px;padding:8px 10px;"><div style="font-size:9px;color:var(--sub)">Avg CTR</div><div style="font-size:18px;font-weight:800;color:#21a866">10.3%</div></div>
+        <div style="background:var(--s2);border-radius:8px;padding:8px 10px;"><div style="font-size:9px;color:var(--sub)">Avg Likes/Post</div><div style="font-size:18px;font-weight:800;color:#21a866">41</div></div>
+      </div>
+      <div style="margin-top:10px;font-size:10px;color:var(--sub);background:rgba(33,168,102,.08);border-radius:6px;padding:6px 8px;">🏆 Best for engagement rate &amp; CTR</div>
+    </div>
+
+    <div class="card" style="border-top:3px solid #2189bd;padding:16px 18px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <div style="width:36px;height:36px;background:rgba(33,137,189,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;">🖼</div>
+        <div><div style="font-size:13px;font-weight:700;color:var(--tx)">Image</div><div style="font-size:10px;color:var(--sub)">39 posts · PDF data</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div style="background:var(--s2);border-radius:8px;padding:8px 10px;"><div style="font-size:9px;color:var(--sub)">Avg Impressions</div><div style="font-size:18px;font-weight:800;color:#2189bd">1,453</div></div>
+        <div style="background:var(--s2);border-radius:8px;padding:8px 10px;"><div style="font-size:9px;color:var(--sub)">Avg Eng. Rate</div><div style="font-size:18px;font-weight:800;color:#2189bd">10.7%</div></div>
+        <div style="background:var(--s2);border-radius:8px;padding:8px 10px;"><div style="font-size:9px;color:var(--sub)">Total Reach</div><div style="font-size:18px;font-weight:800;color:#2189bd">56.7K</div></div>
+        <div style="background:var(--s2);border-radius:8px;padding:8px 10px;"><div style="font-size:9px;color:var(--sub)">Avg Likes/Post</div><div style="font-size:18px;font-weight:800;color:#2189bd">23</div></div>
+      </div>
+      <div style="margin-top:10px;font-size:10px;color:var(--sub);background:rgba(33,137,189,.08);border-radius:6px;padding:6px 8px;">📣 Best for total reach &amp; volume scale</div>
+    </div>
+
+    <div class="card" style="border-top:3px solid #9b59b6;padding:16px 18px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <div style="width:36px;height:36px;background:rgba(155,89,182,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;">📝</div>
+        <div><div style="font-size:13px;font-weight:700;color:var(--tx)">Text</div><div style="font-size:10px;color:var(--sub)">21 posts · PDF data</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div style="background:var(--s2);border-radius:8px;padding:8px 10px;"><div style="font-size:9px;color:var(--sub)">Avg Impressions</div><div style="font-size:18px;font-weight:800;color:#9b59b6">1,038</div></div>
+        <div style="background:var(--s2);border-radius:8px;padding:8px 10px;"><div style="font-size:9px;color:var(--sub)">Avg Eng. Rate</div><div style="font-size:18px;font-weight:800;color:#9b59b6">4.9%</div></div>
+        <div style="background:var(--s2);border-radius:8px;padding:8px 10px;"><div style="font-size:9px;color:var(--sub)">Total Reach</div><div style="font-size:18px;font-weight:800;color:#9b59b6">21.8K</div></div>
+        <div style="background:var(--s2);border-radius:8px;padding:8px 10px;"><div style="font-size:9px;color:var(--sub)">Avg Likes/Post</div><div style="font-size:18px;font-weight:800;color:#9b59b6">22</div></div>
+      </div>
+      <div style="margin-top:10px;font-size:10px;color:var(--sub);background:rgba(155,89,182,.08);border-radius:6px;padding:6px 8px;">💡 Good for thought leadership · lowest reach</div>
+    </div>
+
+    <div class="card" style="border-top:3px solid #e07b2a;padding:16px 18px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <div style="width:36px;height:36px;background:rgba(224,123,42,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;">📄</div>
+        <div><div style="font-size:13px;font-weight:700;color:var(--tx)">Article</div><div style="font-size:10px;color:var(--sub)">5 posts · XLS data</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div style="background:var(--s2);border-radius:8px;padding:8px 10px;"><div style="font-size:9px;color:var(--sub)">Avg Impressions</div><div style="font-size:18px;font-weight:800;color:#e07b2a">541</div></div>
+        <div style="background:var(--s2);border-radius:8px;padding:8px 10px;"><div style="font-size:9px;color:var(--sub)">Avg Eng. Rate</div><div style="font-size:18px;font-weight:800;color:#e07b2a">5.5%</div></div>
+        <div style="background:var(--s2);border-radius:8px;padding:8px 10px;"><div style="font-size:9px;color:var(--sub)">Avg CTR</div><div style="font-size:18px;font-weight:800;color:#e07b2a">3.5%</div></div>
+        <div style="background:var(--s2);border-radius:8px;padding:8px 10px;"><div style="font-size:9px;color:var(--sub)">Avg Likes/Post</div><div style="font-size:18px;font-weight:800;color:#e07b2a">10</div></div>
+      </div>
+      <div style="margin-top:10px;font-size:10px;color:var(--sub);background:rgba(224,123,42,.08);border-radius:6px;padding:6px 8px;">⚡ Newest format · still building audience</div>
+    </div>
+  </div>
+
+  <!-- Comparison charts -->
+  <div class="row c2" style="margin-bottom:20px;">
+    <div class="card"><h3>Avg Impressions per Post by Media Type</h3><p class="csub">Video tops at 1,693 avg · Image strong at 1,453 · Text &amp; Article trail behind</p><div class="cht h2"><canvas id="mediaAvgImprChart"></canvas></div></div>
+    <div class="card"><h3>Avg Engagement Rate by Media Type</h3><p class="csub">Video 13% → Image 10.7% → Article 5.5% → Text 4.9% · Video is 2.65× more engaging than text</p><div class="cht h2"><canvas id="mediaEngRateChart"></canvas></div></div>
+  </div>
+
+  <div class="row c2" style="margin-bottom:20px;">
+    <div class="card"><h3>Monthly Impressions by Media Type (Stacked)</h3><p class="csub">Image/Text dominates volume · Video drives spikes in Sep, Oct, Jan · Articles emerging Apr–May 2026</p><div class="cht h3"><canvas id="mediaStackedChart"></canvas></div></div>
+    <div class="card"><h3>Post Count vs Total Reach by Media</h3><p class="csub">Image publishes 2× more than video but only gains 2.1× more total reach — video is highly efficient</p><div class="cht h3"><canvas id="mediaEfficiencyChart"></canvas></div></div>
+  </div>
+
+  <!-- Insight box -->
+  <div class="row c2" style="margin-bottom:20px;">
+    <div class="card">
+      <h3>Key Media Insights</h3><p class="csub">What the data tells you about your content mix</p>
+      <div class="ibox"><div class="it">🎬 Video is your highest-ROI format</div><div class="iv">13% engagement rate and 10.3% CTR — the best numbers across all formats. Yet only 19% of posts are video. Every video post drives 2.65× more engagement than a text post for the same effort.</div></div>
+      <div class="ibox"><div class="it">🖼 Image is your workhorse</div><div class="iv">39 image posts generate 56.7K total impressions — the biggest reach engine. Welcome aboard, Employee Milestone, and Employer Branding posts are all image-based and consistently hit 1,400+ impressions each.</div></div>
+      <div class="ibox"><div class="it">📝 Text works for thought leadership only</div><div class="iv">Lowest avg impressions (1,038) and lowest engagement (4.9%). But the Jan 23 text post hit 4,802 impressions — suggesting that highly resonant thought leadership topics can break through regardless of format.</div></div>
+      <div class="ibox"><div class="it">📄 Articles are nascent but promising</div><div class="iv">Only 5 articles posted (Apr–Jun 2026) — too early to judge. The Stanford AI Index series averaged 614 impressions with 5.5% engagement. Worth continuing to test for HASQ audience nurturing.</div></div>
+    </div>
+    <div class="card">
+      <h3>Recommended Content Mix</h3><p class="csub">Based on engagement data · for next 3 months</p>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px;">
+        <div style="background:rgba(33,168,102,.08);border:1px solid rgba(33,168,102,.2);border-radius:9px;padding:12px 14px;">
+          <div style="font-size:11px;font-weight:700;color:#21a866;margin-bottom:4px;">🎬 Video — Increase to 35%</div>
+          <div style="font-size:11px;color:var(--sub);line-height:1.5;">Currently 19%. Target 2 videos/week. Use for Employer Branding, Company Culture, and HASQ explainers. Highest follower-spike correlation.</div>
+        </div>
+        <div style="background:rgba(33,137,189,.08);border:1px solid rgba(33,137,189,.2);border-radius:9px;padding:12px 14px;">
+          <div style="font-size:11px;font-weight:700;color:#2189bd;margin-bottom:4px;">🖼 Image — Maintain at 40%</div>
+          <div style="font-size:11px;color:var(--sub);line-height:1.5;">Keep welcome, milestone &amp; wishes posts as image. Strong consistent reach. Batch-design 4 weeks at a time to reduce effort.</div>
+        </div>
+        <div style="background:rgba(155,89,182,.08);border:1px solid rgba(155,89,182,.2);border-radius:9px;padding:12px 14px;">
+          <div style="font-size:11px;font-weight:700;color:#9b59b6;margin-bottom:4px;">📝 Text — Reduce to 15%</div>
+          <div style="font-size:11px;color:var(--sub);line-height:1.5;">Reserve text-only for Douglas's high-conviction thought leadership. Don't use for job posts or announcements — image outperforms every time.</div>
+        </div>
+        <div style="background:rgba(224,123,42,.08);border:1px solid rgba(224,123,42,.2);border-radius:9px;padding:12px 14px;">
+          <div style="font-size:11px;font-weight:700;color:#e07b2a;margin-bottom:4px;">📄 Article — Scale to 10%</div>
+          <div style="font-size:11px;color:var(--sub);line-height:1.5;">HASQ white papers and Signal series belong here. Good for SEO-adjacent visibility and long-form nurturing of decision-makers.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">Post Type & Content Analysis</div>
+  <div class="row c2">
+    <div class="card"><h3>Engagement Rate by Post Type</h3><p class="csub">Employer Branding highest at 14.1% · Thought Leadership underperforms vs effort</p><div class="cht h3"><canvas id="cPostTypeEngChart"></canvas></div></div>
+    <div class="card"><h3>Impressions by Post Type</h3><p class="csub">Welcome aboard + Thought Leadership drive most reach · each with ~29K impressions</p><div class="cht h3"><canvas id="cPostTypeImpChart"></canvas></div></div>
+  </div>
+
+  <div class="row c2">
+    <div class="card"><h3>Post Volume by Type</h3><p class="csub">Image-heavy strategy (39 posts) · Text (21) · Video (19) — matches recommendation</p><div class="cht h2"><canvas id="cPostVolChart"></canvas></div></div>
+    <div class="card"><h3>Media Type Efficiency</h3><p class="csub">Clicks per post · Video leads with 182 avg clicks vs 68 for Image/Text · 2.7× more clickable</p><div class="cht h2"><canvas id="cMediaClicksChart"></canvas></div></div>
+  </div>
+
+  <div class="sec">Top Posts by Impressions</div>
+  <div class="tcard">
+    <div class="thead"><h3>Best Performing Posts (PDF Report Data)</h3><p>Ranked by impressions · Employer Branding and Welcome aboard posts dominate top spots</p></div>
+    <table><thead><tr><th>#</th><th>Date</th><th>Type</th><th>Media</th><th>Impressions</th><th>Engagements</th><th>Reactions</th><th>Eng%</th></tr></thead>
+    <tbody id="topPostsTable"></tbody></table>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════ AD CAMPAIGNS ═══════════════════════ -->
+<div id="page-ads" class="page">
+  <div class="ptitle">
+    <h1>LinkedIn Ad Campaign Performance</h1>
+    <p>Account: Mediant Labs Inc. — Primary · Account ID: 516781033</p>
+    <span class="period">📅 Oct 16, 2025 – Jun 8, 2026 · Total Invested: $1,499.50 · 4 Campaigns</span>
+  </div>
+
+  <!-- OVERALL KPIs -->
+  <div class="kgrid" style="grid-template-columns:repeat(auto-fit,minmax(155px,1fr));">
+    <div class="kcard"><div class="klbl">Total Ad Spend</div><div class="kval">$1,499</div><div class="ksub">Across 4 campaigns</div><span class="kbadge bg">USD</span></div>
+    <div class="kcard kb"><div class="klbl">Total Impressions</div><div class="kval">104K</div><div class="ksub">104,786 total</div><span class="kbadge bb">Impressions</span></div>
+    <div class="kcard"><div class="klbl">Total Clicks</div><div class="kval">78</div><div class="ksub">Across all campaigns</div><span class="kbadge bg">Clicks</span></div>
+    <div class="kcard ko"><div class="klbl">Overall CTR</div><div class="kval">0.07%</div><div class="ksub">Industry avg ~0.4%</div><span class="kbadge bb">CTR</span></div>
+    <div class="kcard kp"><div class="klbl">Avg CPM</div><div class="kval">$14.31</div><div class="ksub">Cost per 1K impressions</div><span class="kbadge bb">CPM</span></div>
+    <div class="kcard"><div class="klbl">Video Views</div><div class="kval">64,967</div><div class="ksub">Boost video campaign</div><span class="kbadge bg">Views</span></div>
+    <div class="kcard kb"><div class="klbl">HASQ Clicks</div><div class="kval">69</div><div class="ksub">TOF + MOF combined</div><span class="kbadge bb">HASQ</span></div>
+    <div class="kcard kr"><div class="klbl">Avg CPC (HASQ)</div><div class="kval">$17.38</div><div class="ksub">TOF+MOF website visits</div><span class="kbadge bb">CPC</span></div>
+  </div>
+
+  <!-- CAMPAIGN BREAKDOWN -->
+  <div class="sec">Campaign Performance Breakdown</div>
+
+  <!-- Campaign cards -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-bottom:22px;">
+    <!-- Pilot -->
+    <div class="card" style="border-left:4px solid #8b93b0;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+        <div><div style="font-size:13px;font-weight:700;color:var(--tx)">🔬 Pilot Campaign</div><div style="font-size:10px;color:var(--sub);margin-top:2px;">Oct 20–24, 2025 · Video Views · CPM</div></div>
+        <span style="background:rgba(139,147,176,.15);color:#8b93b0;border:1px solid rgba(139,147,176,.3);padding:2px 8px;border-radius:8px;font-size:9px;font-weight:700;">PAUSED</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px;">
+        <div style="background:var(--s2);border-radius:7px;padding:8px;text-align:center;"><div style="font-size:9px;color:var(--sub)">Spend</div><div style="font-size:16px;font-weight:800;color:var(--tx)">$100</div></div>
+        <div style="background:var(--s2);border-radius:7px;padding:8px;text-align:center;"><div style="font-size:9px;color:var(--sub)">Impressions</div><div style="font-size:16px;font-weight:800;color:var(--tx)">11.3K</div></div>
+        <div style="background:var(--s2);border-radius:7px;padding:8px;text-align:center;"><div style="font-size:9px;color:var(--sub)">Vid Views</div><div style="font-size:16px;font-weight:800;color:var(--tx)">7,472</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
+        <div style="background:var(--s2);border-radius:7px;padding:8px;text-align:center;"><div style="font-size:9px;color:var(--sub)">Budget</div><div style="font-size:13px;font-weight:700;color:var(--tx)">$100</div></div>
+        <div style="background:var(--s2);border-radius:7px;padding:8px;text-align:center;"><div style="font-size:9px;color:var(--sub)">CPM</div><div style="font-size:13px;font-weight:700;color:var(--tx)">$8.81</div></div>
+        <div style="background:var(--s2);border-radius:7px;padding:8px;text-align:center;"><div style="font-size:9px;color:var(--sub)">View Rate</div><div style="font-size:13px;font-weight:700;color:var(--tx)">65.8%</div></div>
+      </div>
+      <div style="margin-top:8px;font-size:10px;color:var(--sub);line-height:1.4;">Audience Network campaign. Strong video view rate (65.8%) — good content resonance test.</div>
+    </div>
+
+    <!-- ML Boost Video -->
+    <div class="card" style="border-left:4px solid #9b59b6;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+        <div><div style="font-size:13px;font-weight:700;color:var(--tx)">📢 ML_Boost — Video Post</div><div style="font-size:10px;color:var(--sub);margin-top:2px;">Mar 30–Apr 3, 2026 · Brand Awareness · Max Delivery</div></div>
+        <span style="background:rgba(155,89,182,.15);color:#9b59b6;border:1px solid rgba(155,89,182,.3);padding:2px 8px;border-radius:8px;font-size:9px;font-weight:700;">PAUSED</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px;">
+        <div style="background:var(--s2);border-radius:7px;padding:8px;text-align:center;"><div style="font-size:9px;color:var(--sub)">Spend</div><div style="font-size:16px;font-weight:800;color:#9b59b6">$150</div></div>
+        <div style="background:var(--s2);border-radius:7px;padding:8px;text-align:center;"><div style="font-size:9px;color:var(--sub)">Impressions</div><div style="font-size:16px;font-weight:800;color:#9b59b6">79.4K</div></div>
+        <div style="background:var(--s2);border-radius:7px;padding:8px;text-align:center;"><div style="font-size:9px;color:var(--sub)">Vid Views</div><div style="font-size:16px;font-weight:800;color:#9b59b6">64.9K</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
+        <div style="background:var(--s2);border-radius:7px;padding:8px;text-align:center;"><div style="font-size:9px;color:var(--sub)">Budget</div><div style="font-size:13px;font-weight:700;color:var(--tx)">$150</div></div>
+        <div style="background:var(--s2);border-radius:7px;padding:8px;text-align:center;"><div style="font-size:9px;color:var(--sub)">CPM</div><div style="font-size:13px;font-weight:700;color:var(--tx)">$1.88</div></div>
+        <div style="background:var(--s2);border-radius:7px;padding:8px;text-align:center;"><div style="font-size:9px;color:var(--sub)">View Rate</div><div style="font-size:13px;font-weight:700;color:var(--tx)">81.8%</div></div>
+      </div>
+      <div style="margin-top:8px;font-size:10px;color:var(--sub);line-height:1.4;">Best CPM ($1.88) — Audience Network reach. 81.8% video view rate. Brand awareness at scale.</div>
+    </div>
+
+    <!-- HASQ TOF -->
+    <div class="card" style="border-left:4px solid #21a866;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+        <div><div style="font-size:13px;font-weight:700;color:var(--tx)">🎯 ML-HASQ-TOF (Top of Funnel)</div><div style="font-size:10px;color:var(--sub);margin-top:2px;">Apr 24–30, 2026 · Website Visits · Max Delivery</div></div>
+        <span style="background:rgba(33,168,102,.15);color:#21a866;border:1px solid rgba(33,168,102,.3);padding:2px 8px;border-radius:8px;font-size:9px;font-weight:700;">PAUSED</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px;">
+        <div style="background:var(--s2);border-radius:7px;padding:8px;text-align:center;"><div style="font-size:9px;color:var(--sub)">Spend</div><div style="font-size:16px;font-weight:800;color:#21a866">$500</div></div>
+        <div style="background:var(--s2);border-radius:7px;padding:8px;text-align:center;"><div style="font-size:9px;color:var(--sub)">Impressions</div><div style="font-size:16px;font-weight:800;color:#21a866">7,344</div></div>
+        <div style="background:var(--s2);border-radius:7px;padding:8px;text-align:center;"><div style="font-size:9px;color:var(--sub)">Clicks</div><div style="font-size:16px;font-weight:800;color:#21a866">21</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
+        <div style="background:var(--s2);border-radius:7px;padding:8px;text-align:center;"><div style="font-size:9px;color:var(--sub)">Budget</div><div style="font-size:13px;font-weight:700;color:var(--tx)">$500</div></div>
+        <div style="background:var(--s2);border-radius:7px;padding:8px;text-align:center;"><div style="font-size:9px;color:var(--sub)">CTR</div><div style="font-size:13px;font-weight:700;color:var(--tx)">0.286%</div></div>
+        <div style="background:var(--s2);border-radius:7px;padding:8px;text-align:center;"><div style="font-size:9px;color:var(--sub)">CPC</div><div style="font-size:13px;font-weight:700;color:var(--tx)">$23.81</div></div>
+      </div>
+      <div style="margin-top:8px;font-size:10px;color:var(--sub);line-height:1.4;">HASQ awareness targeting. Set 02 outperformed Set 01 (CTR 0.287% vs 0.285%). 2 adsets, both LinkedIn.</div>
+    </div>
+
+    <!-- HASQ MOF -->
+    <div class="card" style="border-left:4px solid #2189bd;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+        <div><div style="font-size:13px;font-weight:700;color:var(--tx)">🎯 ML-HASQ-MOF (Mid of Funnel)</div><div style="font-size:10px;color:var(--sub);margin-top:2px;">May 1–8, 2026 · Website Visits · Max Delivery</div></div>
+        <span style="background:rgba(33,137,189,.15);color:#2189bd;border:1px solid rgba(33,137,189,.3);padding:2px 8px;border-radius:8px;font-size:9px;font-weight:700;">PAUSED</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px;">
+        <div style="background:var(--s2);border-radius:7px;padding:8px;text-align:center;"><div style="font-size:9px;color:var(--sub)">Spend</div><div style="font-size:16px;font-weight:800;color:#2189bd">$700</div></div>
+        <div style="background:var(--s2);border-radius:7px;padding:8px;text-align:center;"><div style="font-size:9px;color:var(--sub)">Impressions</div><div style="font-size:16px;font-weight:800;color:#2189bd">12,270</div></div>
+        <div style="background:var(--s2);border-radius:7px;padding:8px;text-align:center;"><div style="font-size:9px;color:var(--sub)">Clicks</div><div style="font-size:16px;font-weight:800;color:#2189bd">48</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
+        <div style="background:var(--s2);border-radius:7px;padding:8px;text-align:center;"><div style="font-size:9px;color:var(--sub)">Budget</div><div style="font-size:13px;font-weight:700;color:var(--tx)">$700</div></div>
+        <div style="background:var(--s2);border-radius:7px;padding:8px;text-align:center;"><div style="font-size:9px;color:var(--sub)">CTR</div><div style="font-size:13px;font-weight:700;color:var(--tx)">0.391%</div></div>
+        <div style="background:var(--s2);border-radius:7px;padding:8px;text-align:center;"><div style="font-size:9px;color:var(--sub)">CPC</div><div style="font-size:13px;font-weight:700;color:var(--tx)">$14.58</div></div>
+      </div>
+      <div style="margin-top:8px;font-size:10px;color:var(--sub);line-height:1.4;">Best CTR (0.391%) across HASQ campaigns. Set 02 dominated at $527 spend · 41 clicks · 0.428% CTR.</div>
+    </div>
+  </div>
+
+  <!-- CHARTS ROW 1 -->
+  <div class="sec">Spend & Impressions Comparison</div>
+  <div class="row c2" style="margin-bottom:20px;">
+    <div class="card"><h3>Budget Allocation by Campaign</h3><p class="csub">Total $1,499.50 · HASQ campaigns = 80% of total spend</p><div class="cht h2"><canvas id="adSpendChart"></canvas></div></div>
+    <div class="card"><h3>Impressions by Campaign</h3><p class="csub">ML Boost Video dominates volume (79K) at very low CPM ($1.88) via Audience Network</p><div class="cht h2"><canvas id="adImprChart"></canvas></div></div>
+  </div>
+
+  <!-- ADSET PERFORMANCE TABLE -->
+  <div class="sec">Ad Set Level Performance</div>
+  <div class="tcard" style="margin-bottom:20px;">
+    <div class="thead"><h3>All Ad Sets — Detailed Metrics</h3><p>Oct 2025 – Jun 2026 · LinkedIn Campaign Manager data</p></div>
+    <table>
+      <thead><tr><th>#</th><th>Campaign</th><th>Ad Set</th><th>Objective</th><th>Period</th><th>Spend</th><th>Impressions</th><th>Clicks</th><th>CTR</th><th>CPM</th><th>CPC</th></tr></thead>
+      <tbody>
+        <tr><td><span class="rnk r1">1</span></td><td>ML-HASQ-MOF-May 2026</td><td>Set 02</td><td>Website visits</td><td>May 1–8, 26</td><td>$527.37</td><td>9,569</td><td>41</td><td style="color:#21a866;font-weight:700">0.428%</td><td>$55.11</td><td>$12.86</td></tr>
+        <tr><td><span class="rnk r2">2</span></td><td>ML-HASQ-TOF-April 2026</td><td>Set 02</td><td>Website visits</td><td>Apr 24–30, 26</td><td>$258.90</td><td>3,836</td><td>11</td><td>0.287%</td><td>$67.49</td><td>$23.54</td></tr>
+        <tr><td><span class="rnk r3">3</span></td><td>ML-HASQ-TOF-April 2026</td><td>Set 01</td><td>Website visits</td><td>Apr 24–30, 26</td><td>$241.07</td><td>3,508</td><td>10</td><td>0.285%</td><td>$68.72</td><td>$24.11</td></tr>
+        <tr><td><span class="rnk rn">4</span></td><td>ML-HASQ-MOF-May 2026</td><td>Set 01</td><td>Website visits</td><td>May 1–8, 26</td><td>$172.61</td><td>2,701</td><td>7</td><td>0.259%</td><td>$63.90</td><td>$24.66</td></tr>
+        <tr><td><span class="rnk rn">5</span></td><td>ML_Boost Post Campaign</td><td>Video Brand Awareness</td><td>Brand awareness</td><td>Mar 30–Apr 3, 26</td><td>$149.55</td><td style="color:#9b59b6;font-weight:700">79,406</td><td>6</td><td>0.008%</td><td style="color:#21a866;font-weight:700">$1.88</td><td>$24.93</td></tr>
+        <tr><td><span class="rnk rn">6</span></td><td>ML-Boost May 2026</td><td>Part 4</td><td>Brand awareness</td><td>May 11–13, 26</td><td>$50.00</td><td>1,988</td><td>2</td><td>0.101%</td><td>$25.16</td><td>$25.00</td></tr>
+        <tr><td><span class="rnk rn">7</span></td><td>ML-Boost May 2026</td><td>Part 3</td><td>Brand awareness</td><td>May 11–13, 26</td><td>$50.00</td><td>1,881</td><td>0</td><td>0.000%</td><td>$26.58</td><td>—</td></tr>
+        <tr><td><span class="rnk rn">8</span></td><td>Pilot</td><td>Pilot Oct 2025</td><td>Video views</td><td>Oct 20–24, 25</td><td>$100.00</td><td>11,349</td><td>4</td><td>0.035%</td><td>$8.81</td><td>$25.00</td></tr>
+        <tr><td><span class="rnk rn">9</span></td><td>ML-Boost May 2026</td><td>Part 1 & 2</td><td>Brand awareness</td><td>May 11–13, 26</td><td>$50.00</td><td>1,897</td><td>1</td><td>0.053%</td><td>$26.35</td><td>$50.00</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- CTR FUNNEL + VIDEO RETENTION -->
+  <div class="sec">HASQ Funnel Performance & Video Retention</div>
+  <div class="row c2" style="margin-bottom:20px;">
+    <div class="card"><h3>HASQ CTR by Ad Set</h3><p class="csub">MOF Set 02 best at 0.428% · All HASQ sets near or above LinkedIn avg 0.3%</p><div class="cht h2"><canvas id="hasqCTRChart"></canvas></div></div>
+    <div class="card"><h3>Video Retention Funnel — ML Boost Video</h3><p class="csub">79,406 impressions → 64,967 plays → % watching at each quartile</p><div class="cht h2"><canvas id="videoFunnelChart"></canvas></div></div>
+  </div>
+
+  <!-- DEMOGRAPHICS -->
+  <div class="sec">Ad Audience Demographics (908K impressions)</div>
+  <div class="row c2" style="margin-bottom:20px;">
+    <div class="card"><h3>Top Industries Reached</h3><p class="csub">Tech & Internet (22.7%) + IT Services (16.2%) — strong enterprise reach</p><div class="cht h3"><canvas id="adIndChart"></canvas></div></div>
+    <div class="card"><h3>Top Job Functions Reached</h3><p class="csub">Engineering, Business Dev, IT = top 3 · Total ~30% of impressions</p><div class="cht h3"><canvas id="adJobChart"></canvas></div></div>
+  </div>
+
+  <div class="row c2" style="margin-bottom:20px;">
+    <div class="card"><h3>Seniority Distribution</h3><p class="csub">Senior (28%) + Director (9.3%) + Manager (8.2%) = 45.5% decision-influencers</p><div class="cht h2"><canvas id="adSenChart"></canvas></div></div>
+    <div class="card"><h3>Top Locations (Country)</h3><p class="csub">US (36.9%) + Canada (12.8%) = 49.7% North America reach — validates HASQ geo-targeting</p><div class="cht h2"><canvas id="adLocChart"></canvas></div></div>
+  </div>
+
+  <!-- TOP JOB TITLES TABLE -->
+  <div class="sec">Top Job Titles Reached</div>
+  <div class="tcard" style="margin-bottom:20px;">
+    <div class="thead"><h3>Decision-Maker Titles in Ad Audience</h3><p>C-Suite and owner-level titles dominating impressions — strong alignment with HASQ buyer persona</p></div>
+    <table>
+      <thead><tr><th>#</th><th>Job Title</th><th>Impressions</th><th>Share</th><th>Clicks</th><th>Distribution</th></tr></thead>
+      <tbody id="adTitlesTable"></tbody>
+    </table>
+  </div>
+
+  <!-- INSIGHTS -->
+  <div class="sec">Campaign Insights & Recommendations</div>
+  <div class="row c2" style="margin-bottom:20px;">
+    <div class="card">
+      <h3>What's Working</h3><p class="csub">Signals from campaign data</p>
+      <div class="ibox"><div class="it">📈 MOF outperforms TOF</div><div class="iv">HASQ-MOF-May (0.391% CTR, $14.58 CPC) beat TOF-April (0.286%, $23.81 CPC). Retargeting warm audiences is more efficient — prioritise MOF budget in next cycle.</div></div>
+      <div class="ibox"><div class="it">🎬 Video reach at ultra-low CPM</div><div class="iv">ML Boost Video delivered 79K impressions at just $1.88 CPM via Audience Network. 81.8% video view rate signals strong content quality. Use for brand awareness at scale before HASQ lead campaigns.</div></div>
+      <div class="ibox"><div class="it">🌍 North America audience confirmed</div><div class="iv">US (36.9%) + Canada (12.8%) = 49.7% of ad impressions — confirming HASQ geo-targeting is working. Greater Toronto Area alone drove 19 clicks — highest single-city engagement.</div></div>
+      <div class="ibox"><div class="it">👔 C-Suite is in your audience</div><div class="iv">Owner, Founder, President, CEO = top 4 job titles reached. Senior-level targeting is working — these are HASQ's ideal buyers.</div></div>
+    </div>
+    <div class="card">
+      <h3>Optimisation Recommendations</h3><p class="csub">Next campaign cycle</p>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px;">
+        <div style="background:rgba(33,168,102,.08);border:1px solid rgba(33,168,102,.2);border-radius:9px;padding:12px 14px;">
+          <div style="font-size:11px;font-weight:700;color:#21a866;margin-bottom:4px;">💰 Budget: Shift to MOF-heavy (60/40)</div>
+          <div style="font-size:11px;color:var(--sub);line-height:1.5;">MOF delivers 37% lower CPC than TOF. For the next $1,500, allocate $900 to MOF retargeting and $600 to TOF awareness.</div>
+        </div>
+        <div style="background:rgba(33,137,189,.08);border:1px solid rgba(33,137,189,.2);border-radius:9px;padding:12px 14px;">
+          <div style="font-size:11px;font-weight:700;color:#2189bd;margin-bottom:4px;">🎯 Add Lead Gen forms to HASQ campaigns</div>
+          <div style="font-size:11px;color:var(--sub);line-height:1.5;">Current campaigns drive clicks to the website but track 0 leads/conversions in the report. Adding LinkedIn Lead Gen forms directly to HASQ ads would capture contacts without a landing page dependency.</div>
+        </div>
+        <div style="background:rgba(155,89,182,.08);border:1px solid rgba(155,89,182,.2);border-radius:9px;padding:12px 14px;">
+          <div style="font-size:11px;font-weight:700;color:#9b59b6;margin-bottom:4px;">📢 Run Follower Ads alongside HASQ</div>
+          <div style="font-size:11px;color:var(--sub);line-height:1.5;">Follower Ads targeting US/Canada professionals in Engineering, L&D, and Operations verticals would compound HASQ brand awareness while growing the company page to international audiences.</div>
+        </div>
+        <div style="background:rgba(224,123,42,.08);border:1px solid rgba(224,123,42,.2);border-radius:9px;padding:12px 14px;">
+          <div style="font-size:11px;font-weight:700;color:#e07b2a;margin-bottom:4px;">🔁 Test A/B on ad creative for HASQ</div>
+          <div style="font-size:11px;color:var(--sub);line-height:1.5;">TOF Set 01 vs Set 02 had near-identical CTR — suggests audience difference, not creative. Test 1 image ad vs 1 video ad in the same audience to find the format that resonates best for HASQ.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ COMPETITORS ═══════════════════════ -->
+<div id="page-competitors" class="page">
+  <div class="ptitle">
+    <h1>Competitor Benchmarking</h1>
+    <p>LinkedIn company page comparison · Jun 7, 2025 – Jun 6, 2026</p>
+    <span class="period">📅 Same 12-month period for all competitors</span>
+  </div>
+
+  <div class="sec">New Followers Comparison</div>
+  <div class="comp-row">
+    <div class="comp-card"><div class="comp-name">Novac Technology Solutions</div><div class="comp-val" style="color:#e74c3c">60,159</div><div class="comp-sub">New followers · #1</div></div>
+    <div class="comp-card"><div class="comp-name">GP Strategies Corporation</div><div class="comp-val" style="color:#e07b2a">42,969</div><div class="comp-sub">New followers · #2</div></div>
+    <div class="comp-card"><div class="comp-name">Infopro Learning</div><div class="comp-val" style="color:#f5b942">16,210</div><div class="comp-sub">New followers · #3</div></div>
+    <div class="comp-card"><div class="comp-name">ELB Learning</div><div class="comp-val" style="color:#9b59b6">2,958</div><div class="comp-sub">New followers · #4</div></div>
+    <div class="comp-card highlight"><div class="comp-name">Mediant Labs 🎯</div><div class="comp-val" style="color:#21a866">2,129</div><div class="comp-sub">New followers · #5</div></div>
+    <div class="comp-card"><div class="comp-name">Learning Tech. Group</div><div class="comp-val" style="color:#8b93b0">717</div><div class="comp-sub">New followers · #6</div></div>
+  </div>
+
+  <div class="sec">Full Competitor Comparison</div>
+  <div class="row c2">
+    <div class="card"><h3>New Followers — All Competitors</h3><p class="csub">Mediant Labs at #5 · Close to ELB Learning (#4) · 72% of ELB's growth despite fewer posts</p><div class="cht h3"><canvas id="compFollowersChart"></canvas></div></div>
+    <div class="card"><h3>Reactions Comparison</h3><p class="csub">Mediant Labs reactions (3,263) competitive with ELB Learning (4,077) · Strong engagement quality</p><div class="cht h3"><canvas id="compReactionsChart"></canvas></div></div>
+  </div>
+
+  <div class="row c2">
+    <div class="card"><h3>Posts Volume vs Followers</h3><p class="csub">Mediant Labs: 108 posts for 2,129 followers = 19.7 followers/post · Strong efficiency</p><div class="cht h3"><canvas id="compPostsChart"></canvas></div></div>
+    <div class="card"><h3>Comments Comparison</h3><p class="csub">Mediant Labs #2 in comments (145) — higher comment rate than much larger competitors</p><div class="cht h3"><canvas id="compCommentsChart"></canvas></div></div>
+  </div>
+
+  <div class="sec">Benchmarking Summary</div>
+  <div class="tcard">
+    <div class="thead"><h3>Full Competitor Metrics Table</h3><p>Jun 7, 2025 – Jun 6, 2026 · Same tracking period</p></div>
+    <table>
+      <thead><tr><th>#</th><th>Company</th><th>New Followers</th><th>Posts</th><th>Comments</th><th>Reactions</th><th>Followers/Post</th><th>Reactions/Post</th></tr></thead>
+      <tbody id="compTable"></tbody>
+    </table>
+  </div>
+
+  <div class="sec">Strategic Positioning</div>
+  <div class="row c2">
+    <div class="card">
+      <h3>Where Mediant Labs Stands</h3><p class="csub">Key competitive observations</p>
+      <div class="ibox"><div class="it">📍 Position</div><div class="iv">Mediant Labs ranks #5 in followers but #2 in comments — indicating high-quality, engaged audience vs volume-driven competitors.</div></div>
+      <div class="ibox"><div class="it">⚡ Efficiency</div><div class="iv">19.7 followers/post vs Novac's 218.8. Novac is a 23× larger operation. ELB Learning (closest benchmark) gets 5.4 followers/post — Mediant Labs outperforms at 3.6×.</div></div>
+      <div class="ibox"><div class="it">🎯 Reactions quality</div><div class="iv">3,263 reactions on 108 posts = 30.2 reactions/post. ELB Learning gets 7.4/post on 552 posts. Mediant Labs is 4× more reactive per post.</div></div>
+    </div>
+    <div class="card">
+      <h3>Growth Opportunities</h3><p class="csub">To close the follower gap with ELB Learning</p>
+      <div class="ibox"><div class="it">📈 Close the gap with ELB Learning</div><div class="iv">ELB has 2,958 followers on 552 posts. Mediant achieved 2,129 on just 108. Scaling to 3–4 posts/week with the current engagement quality could match or beat ELB within 6 months.</div></div>
+      <div class="ibox"><div class="it">🌍 Geographic expansion</div><div class="iv">Competitors like GP Strategies and Infopro Learning have US-dominant follower bases. Mediant's India concentration is an opportunity — Follower Ads targeting North America could rapidly shift this.</div></div>
+      <div class="ibox"><div class="it">🎬 Video investment</div><div class="iv">Video posts drive the highest single-post spikes (Oct 10, Feb 18, Mar 16, May 22 all coincide with video/high-engagement posts). Increasing from 19 to 24+ video posts/year aligns with the roadmap recommendation.</div></div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span>Mediant Labs</span> LinkedIn Analytics Report · Generated Jun 8, 2026 · Data: Apr 2025 – Jun 2026
+</footer>
+
+<script>
+// ── TAB NAVIGATION ────────────────────────────────────────────────────────────
+function showTab(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  event.target.classList.add('active');
+  setTimeout(()=>{
+    buildCharts();
+    if(id==='ads') buildAdsCharts();
+  },50);
+}
+
+// ── THEME ─────────────────────────────────────────────────────────────────────
+let isDark=true;
+function toggleTheme(){
+  isDark=!isDark;
+  document.body.classList.toggle('light',!isDark);
+  document.querySelector('.tbtn').textContent=isDark?'☀️ Light':'🌙 Dark';
+  document.getElementById('logo-img').src=isDark?'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2ZXJzaW9uPSIxLjEiIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2aWV3Qm94PSIwIDAgMjEyLjA5IDU5LjU3Ij4KICA8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMzAuNS4xLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogMi4xLjQgQnVpbGQgMykgIC0tPgogIDxkZWZzPgogICAgPHN0eWxlPgogICAgICAuc3QwIHsKICAgICAgICBmaWxsOiAjZmZmZmZmOwogICAgICB9CgogICAgICAuc3QxIHsKICAgICAgICBmaWxsOiAjZmZmZmZmOwogICAgICB9CgogICAgICAuc3QyIHsKICAgICAgICBmaWxsOiBub25lOwogICAgICB9CgogICAgICAuc3QzIHsKICAgICAgICBjbGlwLXBhdGg6IHVybCgjY2xpcHBhdGgpOwogICAgICB9CiAgICA8L3N0eWxlPgogICAgPGNsaXBQYXRoIGlkPSJjbGlwcGF0aCI+CiAgICAgIDxwb2x5Z29uIGNsYXNzPSJzdDIiIHBvaW50cz0iMzIuNzYgMTMuMjEgOS44OCA0Ni45OSA3MC44NyA0Ni45OSA0OC40NCAxMy4yMSAzNC40NiAzNC43MyA0NS42NiAzNC43MyA0OS4xNCAyOS4yNyA1NS45OCAzOS4wOSAyNS44MyAzOS4wOSAzOC4yNyAyMC45NSAzMi43NiAxMy4yMSIvPgogICAgPC9jbGlwUGF0aD4KICA8L2RlZnM+CiAgPGc+CiAgICA8cGF0aCBjbGFzcz0ic3QxIiBkPSJNNzguMSwzMC45NFYxMy4yMWgzLjM5bDcuNTQsMTIuNTFoLTEuOGw3LjQyLTEyLjUxaDMuMzdsLjA1LDE3LjcyaC0zLjg1bC0uMDItMTEuODJoLjcxbC01LjkyLDkuOTVoLTEuODVsLTYuMDUtOS45NWguODZ2MTEuODJoLTMuODVaIi8+CiAgICA8cGF0aCBjbGFzcz0ic3QxIiBkPSJNMTAyLjI4LDMwLjk0VjEzLjIxaDEzLjM5djMuMjloLTkuMzJ2MTEuMTRoOS42NXYzLjI5aC0xMy43MlpNMTA2LjA1LDIzLjU0di0zLjE5aDguNTN2My4xOWgtOC41M1oiLz4KICAgIDxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik0xMTkuMjcsMzAuOTRWMTMuMjFoOC4wNWMxLjkyLDAsMy42Mi4zNyw1LjA5LDEuMXMyLjYyLDEuNzYsMy40NCwzLjA4LDEuMjQsMi44OCwxLjI0LDQuNjgtLjQxLDMuMzUtMS4yNCw0LjY3Yy0uODMsMS4zMy0xLjk3LDIuMzUtMy40NCwzLjA5cy0zLjE2LDEuMS01LjA5LDEuMWgtOC4wNVpNMTIzLjM3LDI3LjU3aDMuNzVjMS4xOCwwLDIuMjEtLjIyLDMuMDgtLjY3Ljg3LS40NSwxLjU0LTEuMDgsMi4wMy0xLjkxcy43Mi0xLjguNzItMi45MS0uMjQtMi4xLS43Mi0yLjkyLTEuMTYtMS40NS0yLjAzLTEuOS0xLjg5LS42Ny0zLjA4LS42N2gtMy43NXYxMC45OVoiLz4KICAgIDxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik0xNDAuMTgsMzAuOTRWMTMuMjFoNC4xdjE3LjcyaC00LjFaIi8+CiAgICA8cGF0aCBjbGFzcz0ic3QxIiBkPSJNMTQ2LjE1LDMwLjk0bDcuOS0xNy43Mmg0LjA1bDcuOTIsMTcuNzJoLTQuM2wtNi40OC0xNS42NWgxLjYybC02LjUxLDE1LjY1aC00LjJaTTE1MC4xLDI3LjE0bDEuMDktMy4xMWg5LjExbDEuMTEsMy4xMWgtMTEuMzJaIi8+CiAgICA8cGF0aCBjbGFzcz0ic3QxIiBkPSJNMTY3Ljg3LDMwLjk0VjEzLjIxaDMuMzlsMTAuNDYsMTIuNzZoLTEuNjV2LTEyLjc2aDQuMDV2MTcuNzJoLTMuMzdsLTEwLjQ4LTEyLjc2aDEuNjV2MTIuNzZoLTQuMDVaIi8+CiAgICA8cGF0aCBjbGFzcz0ic3QxIiBkPSJNMTkyLDMwLjk0di0xNC4zOGgtNS42N3YtMy4zNGgxNS40NHYzLjM0aC01LjY3djE0LjM4aC00LjFaIi8+CiAgPC9nPgogIDxnPgogICAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTc4LjEsNDYuOTl2LTEwLjI2aDEuNDd2OC45OWg1LjU2djEuMjhoLTcuMDJaIi8+CiAgICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNODUuMjUsNDYuOTlsNC42NS0xMC4yNmgxLjQ1bDQuNjYsMTAuMjZoLTEuNTRsLTQuMTUtOS40NGguNTlsLTQuMTUsOS40NGgtMS41MVpNODcuMjMsNDQuNDNsLjQtMS4xN2g1Ljc4bC40MiwxLjE3aC02LjZaIi8+CiAgICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNOTcuNTQsNDYuOTl2LTEwLjI2aDQuNmMxLjE4LDAsMi4wOS4yNCwyLjczLjcxLjYzLjQ3Ljk1LDEuMTIuOTUsMS45NCwwLC41Ni0uMTIsMS4wMy0uMzcsMS40MXMtLjU4LjY3LTEsLjg4Yy0uNDIuMjEtLjg3LjMxLTEuMzYuMzFsLjI2LS40NGMuNTksMCwxLjEuMSwxLjU1LjMxLjQ1LjIxLjgxLjUxLDEuMDcuOS4yNi40LjQuODkuNCwxLjQ3LDAsLjg4LS4zMywxLjU2LS45OSwyLjA1LS42Ni40OC0xLjY0LjczLTIuOTQuNzNoLTQuOVpNOTksNDUuODFoMy4zN2MuODEsMCwxLjQzLS4xNCwxLjg2LS40MS40My0uMjcuNjUtLjcuNjUtMS4yOXMtLjIyLTEuMDMtLjY1LTEuMy0xLjA1LS40MS0xLjg2LS40MWgtMy41di0xLjE5aDMuMTRjLjc0LDAsMS4zMi0uMTQsMS43My0uNDEuNDEtLjI3LjYyLS42OC42Mi0xLjIzcy0uMjEtLjk2LS42Mi0xLjIzYy0uNDEtLjI3LS45OS0uNDEtMS43My0uNDFoLTN2Ny44OVoiLz4KICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0xMTEuNjMsNDcuMTFjLS43OCwwLTEuNTMtLjEyLTIuMjQtLjM2LS43MS0uMjQtMS4yOC0uNTUtMS42OS0uOTNsLjU0LTEuMTRjLjM5LjM0Ljg5LjYzLDEuNS44NS42MS4yMywxLjI0LjM0LDEuODkuMzQuNiwwLDEuMDgtLjA3LDEuNDUtLjIxcy42NS0uMzMuODItLjU2Yy4xOC0uMjQuMjYtLjUxLjI2LS44MSwwLS4zNS0uMTItLjY0LS4zNC0uODVzLS41My0uMzktLjg5LS41MmMtLjM3LS4xMy0uNzctLjI1LTEuMjEtLjM0LS40NC0uMS0uODgtLjIxLTEuMzMtLjM0LS40NC0uMTMtLjg1LS4zLTEuMjItLjUxLS4zNy0uMjEtLjY2LS40OC0uODktLjgzLS4yMi0uMzUtLjM0LS43OS0uMzQtMS4zNHMuMTQtMS4wMS40Mi0xLjQ2Yy4yOC0uNDQuNzEtLjgsMS4yOS0xLjA3LjU4LS4yNywxLjMyLS40LDIuMjItLjQuNiwwLDEuMTkuMDgsMS43Ny4yMy41OS4xNiwxLjA5LjM4LDEuNTIuNjdsLS40OCwxLjE3Yy0uNDQtLjI5LS45LS41MS0xLjM5LS42NC0uNDktLjEzLS45Ni0uMi0xLjQyLS4yLS41OCwwLTEuMDUuMDctMS40Mi4yMi0uMzcuMTUtLjY0LjM0LS44MS41OS0uMTcuMjQtLjI2LjUyLS4yNi44MiwwLC4zNi4xMi42NS4zNC44Ni4yMy4yMi41My4zOS44OS41MS4zNy4xMy43Ny4yNCwxLjIxLjM0LjQ0LjEuODguMjIsMS4zMy4zNC40NC4xMy44NS4yOSwxLjIyLjUuMzcuMjEuNjYuNDguODkuODJzLjM0Ljc4LjM0LDEuMzItLjE0LDEtLjQyLDEuNDQtLjcyLjgtMS4zMSwxLjA3Yy0uNTkuMjctMS4zNC40LTIuMjQuNFoiLz4KICA8L2c+CiAgPGcgY2xhc3M9InN0MyI+CiAgICA8aW1hZ2Ugd2lkdGg9IjY1IiBoZWlnaHQ9IjM4IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg3Ljg4IDExLjIxKSIgeGxpbms6aHJlZj0iZGF0YTppbWFnZS9wbmc7YmFzZTY0LGlWQk9SdzBLR2dvQUFBQU5TVWhFVWdBQUFFSUFBQUFuQ0FZQUFBQzdiWjRCQUFBQUNYQklXWE1BQUFzU0FBQUxFZ0hTM1g3OEFBQUY4VWxFUVZSb2dlMWEyMjRjUlJBOU5lSkRwajhHSHVBSkhpUHVJUWtHRVhBQUIyUkZpcEFpa2poT1RHNk9jN0VoQ2lCTEtGSVVLUUxsWTNZK3hEUEZRM2QxVmZYTzJydnJHUjZRVzFydGJFOVhkWFhWcWVyVGJRTW43YVRaUm1OUEVLNjlaZ2FqdWZqV3duUFYxMTZ6Q0UwdXZqbXFyZFdZeXV2cmZ6T29BMUdIY1AwZlhsU2VxQU5UQzZaMkRQUDhYR01wcmpkZW1ZVnpucXI1L3UyNTVnd2JyMWlrR0F3dzBLeTlNNXE5b3lHQ3FBWFFncWlEb0lMbWpHeTQ4WklaVVo1SmRZUWJMeGRHMWJ4dEZFZUV6UmZNMUFMeVNRdGl0QWliTDQ1Y0RNUElpaU9yK0QxV0d4eHE5YzNuTEprZ3lwa0JvcGdnWUlDSU1MbndidS9jNGVaekJnak1ERW9qck9jSXdPVENlNFBiUFFJaVdxQktLRWhJUUJXZktVV1djVEJUbXRIRzl3WU5rbUpTUE1PdHZ3WlBrVUVkRWJiMm1hb09CQXZsTHVjNDR5QTZwT29RdHZhbkZoTzI5dGs2UUZPa0F5ZzVDS2wvNERhWUkrcXRQNWdOQ2lJQzJvUUF2NkM4eUVJK0k0QmFVQlUva0NKcmFnVlJHOGNQMkFaekJGV0tncHdDQ1FXVUZ5aU9hTkY4YzhybE9Sa25SZWRaVkdoNk1GcWdpblBVdnp3YnpCbHZES0VrM0huS3pESENWTVZDSjg5Z3pzVXVjZ0pnY3Y0am1pVVBRcXlzWUtlUFNML0JERGJGZUloMmJFU0V1M3NNMkx3K2dOMDJMUXEwK0dtcjcrd3lVdDJJaUZMK3dZNkxHRVFZOUlRN2U0T2dZb0RVYUpPUmJUYldWbmpwUS9yZGZQVkpUMHAwY000a0pWSktzYVZQblNydjZydVBqKzJNWTZWR2ZXK0hHUzBJQko4QStzUmdFQ2p1LzErZTlTbHg3MkZra0psM0VFQXBKWkllRDMraEtDWjFCa3FRcFJGUjM5L09CNm9JWjMxMnJOSWd3N1p3ZjVzeldsTHg0NEl2dURRai82NGNWOS9iUGhZcWxuWkVYclFsVGVtM3dOem0rT1NMRlIrNmdqQUp2OGpiSkhXZ2lsMEtvRWdqUzlKUXRhaTM3eTd0aktWU0l6eTRuU0ZOeHBYeHVKZ3FPNUFnejVpc2ZFMVQ4dHdaR3E0eW5CVFpYWUtBdUJPbE1abXVBemwzanBzZ0N5TWk3TnhpSlRtdHFlSmRKa0JDckpBSWxXMzFneVJmV1NTd0lWbUdoRldxeTQ1UkpPZzhncHF3czdVVUtoWlBqV0lMa3kwdjBtZnRrOC9rM0tyZkpRcW02WDlyZW9palFDMmF6MWNwNmovUWR3VlRKZEx4NGVIbXdzNVl5QkhoMFFibkNLQ012anBCeGt6T2Z1dWNVRCs4emxvTGhFSzNPYkprOUluTzV0eDNCQ0IrbHhUZE90TGNmU3h6RnBuYkVmV2puMWs1Z3g2a0xDckVLS282VE02cyticnc2Q3Jic1hKNFlzU0RHVWlwYzZiaFo5ZDZDeXpqUUUreGxyTlVLaHZ0SGRnUjRja1ZkaEVuUzI0Nmh3NmFGWkhLamszeTZRREZGdVpWUHdNRmdPYk1qNVMzWEl0STUyQkZTdjM0eXR6T21HL1hvQTdDZWpoVmVFdHRwRWxmYy9yU1ZCR2ZuRjRmaFBrMG42MVQvZVFubHQxRXlGZytoeGhMRnRsS2poeGE3MTVtZS9scWhTeWJGSzdYZkhwNTlEOFJBRURZdlp5T2RvWmh5cTV0Y0VBQUpuUFlkR2hxMUh1WDJGNit3cVNEWHNpeVkzNy9XVFBNTlc2dEtTM2NmV2Q4WCs5ZE9qSkZEazBOb2s2UHdDaVFrTzRleS83dzZ6cDdtUG83UndDOTZhUWpaejJMclBSMVdaY2dVK3hCT3Q4c1VpMW5RaWI4OWdNakF4NG1DZnFYb2tacUxSRkJxU2xaVzNHNVcrcTMrcXhjNmFMODdmUlJEcFFjNU9SK3BQbjQ2c3oxOXQ4a1AxM2pyQXpJZERjL1o0K3pUa1FhSzRzSVgxMHdmY2t5bzFtZGlrcHZreHVmblRLTllCM0RhRDdjNkoyMFB6V29kWkVCQWVsaXlIayszejVWSmxybS9NRUtpbVQ4dEQ0aWphMDRPNzkzTmlXQlNsZHQvMHlRVjJmNmM0Zmc4NUJjbWZKT2VMYkt0Z2JFQmJGN1Z0dE1YMXBQaVI1cGZkRzBrZTY3VjdCemlaeERaakdQZGFTMXY5VFhmTEExTlpsbmY3K2ZaNzlvOVd6NUxNdUxCb21oOGs3N2FXcVA3OWZWTjY1OFA5M3ZLMGVmM2ZhMzlXdnovbTJuMGFkR0lrNE1oV3llaXFJMU9mcG1URFRDcUNHQ0hMTmg5VWh0eUJleVBhZ3k5VVBHeW51SGd0eXZ1d2NLR2VNS3lDQ3J3eTFkSHNLZkt4Ymh1bmhuaEViT0wxcFpKcGVLalQ3OU52dENnVGkxUWFQdDZwVWhVRzdiWkl1T09PN3dZZ3cwcDdiekFJT0lWaU9Zc2VWSkpabnZza0RwQzcvZEh0a01MYzV6SmowU0RNY1UwNkpMaDBjVWNBeWF6QzlYLzBZdUIyVFUvd3c1YVNmdGY5UCtCWkx2YWlqNTQ4QnZBQUFBQUVsRlRrU3VRbUNDIi8+CiAgPC9nPgo8L3N2Zz4=':'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2ZXJzaW9uPSIxLjEiIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2aWV3Qm94PSIwIDAgMjEyLjA5IDU5LjU3Ij4KICA8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMzAuNS4xLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogMi4xLjQgQnVpbGQgMykgIC0tPgogIDxkZWZzPgogICAgPHN0eWxlPgogICAgICAuc3QwIHsKICAgICAgICBmaWxsOiAjMGMwYzBjOwogICAgICB9CgogICAgICAuc3QxIHsKICAgICAgICBmaWxsOiAjMTczNjYxOwogICAgICB9CgogICAgICAuc3QyIHsKICAgICAgICBmaWxsOiBub25lOwogICAgICB9CgogICAgICAuc3QzIHsKICAgICAgICBjbGlwLXBhdGg6IHVybCgjY2xpcHBhdGgpOwogICAgICB9CiAgICA8L3N0eWxlPgogICAgPGNsaXBQYXRoIGlkPSJjbGlwcGF0aCI+CiAgICAgIDxwb2x5Z29uIGNsYXNzPSJzdDIiIHBvaW50cz0iMzIuNzYgMTMuMjEgOS44OCA0Ni45OSA3MC44NyA0Ni45OSA0OC40NCAxMy4yMSAzNC40NiAzNC43MyA0NS42NiAzNC43MyA0OS4xNCAyOS4yNyA1NS45OCAzOS4wOSAyNS44MyAzOS4wOSAzOC4yNyAyMC45NSAzMi43NiAxMy4yMSIvPgogICAgPC9jbGlwUGF0aD4KICA8L2RlZnM+CiAgPGc+CiAgICA8cGF0aCBjbGFzcz0ic3QxIiBkPSJNNzguMSwzMC45NFYxMy4yMWgzLjM5bDcuNTQsMTIuNTFoLTEuOGw3LjQyLTEyLjUxaDMuMzdsLjA1LDE3LjcyaC0zLjg1bC0uMDItMTEuODJoLjcxbC01LjkyLDkuOTVoLTEuODVsLTYuMDUtOS45NWguODZ2MTEuODJoLTMuODVaIi8+CiAgICA8cGF0aCBjbGFzcz0ic3QxIiBkPSJNMTAyLjI4LDMwLjk0VjEzLjIxaDEzLjM5djMuMjloLTkuMzJ2MTEuMTRoOS42NXYzLjI5aC0xMy43MlpNMTA2LjA1LDIzLjU0di0zLjE5aDguNTN2My4xOWgtOC41M1oiLz4KICAgIDxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik0xMTkuMjcsMzAuOTRWMTMuMjFoOC4wNWMxLjkyLDAsMy42Mi4zNyw1LjA5LDEuMXMyLjYyLDEuNzYsMy40NCwzLjA4LDEuMjQsMi44OCwxLjI0LDQuNjgtLjQxLDMuMzUtMS4yNCw0LjY3Yy0uODMsMS4zMy0xLjk3LDIuMzUtMy40NCwzLjA5cy0zLjE2LDEuMS01LjA5LDEuMWgtOC4wNVpNMTIzLjM3LDI3LjU3aDMuNzVjMS4xOCwwLDIuMjEtLjIyLDMuMDgtLjY3Ljg3LS40NSwxLjU0LTEuMDgsMi4wMy0xLjkxcy43Mi0xLjguNzItMi45MS0uMjQtMi4xLS43Mi0yLjkyLTEuMTYtMS40NS0yLjAzLTEuOS0xLjg5LS42Ny0zLjA4LS42N2gtMy43NXYxMC45OVoiLz4KICAgIDxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik0xNDAuMTgsMzAuOTRWMTMuMjFoNC4xdjE3LjcyaC00LjFaIi8+CiAgICA8cGF0aCBjbGFzcz0ic3QxIiBkPSJNMTQ2LjE1LDMwLjk0bDcuOS0xNy43Mmg0LjA1bDcuOTIsMTcuNzJoLTQuM2wtNi40OC0xNS42NWgxLjYybC02LjUxLDE1LjY1aC00LjJaTTE1MC4xLDI3LjE0bDEuMDktMy4xMWg5LjExbDEuMTEsMy4xMWgtMTEuMzJaIi8+CiAgICA8cGF0aCBjbGFzcz0ic3QxIiBkPSJNMTY3Ljg3LDMwLjk0VjEzLjIxaDMuMzlsMTAuNDYsMTIuNzZoLTEuNjV2LTEyLjc2aDQuMDV2MTcuNzJoLTMuMzdsLTEwLjQ4LTEyLjc2aDEuNjV2MTIuNzZoLTQuMDVaIi8+CiAgICA8cGF0aCBjbGFzcz0ic3QxIiBkPSJNMTkyLDMwLjk0di0xNC4zOGgtNS42N3YtMy4zNGgxNS40NHYzLjM0aC01LjY3djE0LjM4aC00LjFaIi8+CiAgPC9nPgogIDxnPgogICAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTc4LjEsNDYuOTl2LTEwLjI2aDEuNDd2OC45OWg1LjU2djEuMjhoLTcuMDJaIi8+CiAgICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNODUuMjUsNDYuOTlsNC42NS0xMC4yNmgxLjQ1bDQuNjYsMTAuMjZoLTEuNTRsLTQuMTUtOS40NGguNTlsLTQuMTUsOS40NGgtMS41MVpNODcuMjMsNDQuNDNsLjQtMS4xN2g1Ljc4bC40MiwxLjE3aC02LjZaIi8+CiAgICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNOTcuNTQsNDYuOTl2LTEwLjI2aDQuNmMxLjE4LDAsMi4wOS4yNCwyLjczLjcxLjYzLjQ3Ljk1LDEuMTIuOTUsMS45NCwwLC41Ni0uMTIsMS4wMy0uMzcsMS40MXMtLjU4LjY3LTEsLjg4Yy0uNDIuMjEtLjg3LjMxLTEuMzYuMzFsLjI2LS40NGMuNTksMCwxLjEuMSwxLjU1LjMxLjQ1LjIxLjgxLjUxLDEuMDcuOS4yNi40LjQuODkuNCwxLjQ3LDAsLjg4LS4zMywxLjU2LS45OSwyLjA1LS42Ni40OC0xLjY0LjczLTIuOTQuNzNoLTQuOVpNOTksNDUuODFoMy4zN2MuODEsMCwxLjQzLS4xNCwxLjg2LS40MS40My0uMjcuNjUtLjcuNjUtMS4yOXMtLjIyLTEuMDMtLjY1LTEuMy0xLjA1LS40MS0xLjg2LS40MWgtMy41di0xLjE5aDMuMTRjLjc0LDAsMS4zMi0uMTQsMS43My0uNDEuNDEtLjI3LjYyLS42OC42Mi0xLjIzcy0uMjEtLjk2LS42Mi0xLjIzYy0uNDEtLjI3LS45OS0uNDEtMS43My0uNDFoLTN2Ny44OVoiLz4KICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0xMTEuNjMsNDcuMTFjLS43OCwwLTEuNTMtLjEyLTIuMjQtLjM2LS43MS0uMjQtMS4yOC0uNTUtMS42OS0uOTNsLjU0LTEuMTRjLjM5LjM0Ljg5LjYzLDEuNS44NS42MS4yMywxLjI0LjM0LDEuODkuMzQuNiwwLDEuMDgtLjA3LDEuNDUtLjIxcy42NS0uMzMuODItLjU2Yy4xOC0uMjQuMjYtLjUxLjI2LS44MSwwLS4zNS0uMTItLjY0LS4zNC0uODVzLS41My0uMzktLjg5LS41MmMtLjM3LS4xMy0uNzctLjI1LTEuMjEtLjM0LS40NC0uMS0uODgtLjIxLTEuMzMtLjM0LS40NC0uMTMtLjg1LS4zLTEuMjItLjUxLS4zNy0uMjEtLjY2LS40OC0uODktLjgzLS4yMi0uMzUtLjM0LS43OS0uMzQtMS4zNHMuMTQtMS4wMS40Mi0xLjQ2Yy4yOC0uNDQuNzEtLjgsMS4yOS0xLjA3LjU4LS4yNywxLjMyLS40LDIuMjItLjQuNiwwLDEuMTkuMDgsMS43Ny4yMy41OS4xNiwxLjA5LjM4LDEuNTIuNjdsLS40OCwxLjE3Yy0uNDQtLjI5LS45LS41MS0xLjM5LS42NC0uNDktLjEzLS45Ni0uMi0xLjQyLS4yLS41OCwwLTEuMDUuMDctMS40Mi4yMi0uMzcuMTUtLjY0LjM0LS44MS41OS0uMTcuMjQtLjI2LjUyLS4yNi44MiwwLC4zNi4xMi42NS4zNC44Ni4yMy4yMi41My4zOS44OS41MS4zNy4xMy43Ny4yNCwxLjIxLjM0LjQ0LjEuODguMjIsMS4zMy4zNC40NC4xMy44NS4yOSwxLjIyLjUuMzcuMjEuNjYuNDguODkuODJzLjM0Ljc4LjM0LDEuMzItLjE0LDEtLjQyLDEuNDQtLjcyLjgtMS4zMSwxLjA3Yy0uNTkuMjctMS4zNC40LTIuMjQuNFoiLz4KICA8L2c+CiAgPGcgY2xhc3M9InN0MyI+CiAgICA8aW1hZ2Ugd2lkdGg9IjY1IiBoZWlnaHQ9IjM4IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg3Ljg4IDExLjIxKSIgeGxpbms6aHJlZj0iZGF0YTppbWFnZS9wbmc7YmFzZTY0LGlWQk9SdzBLR2dvQUFBQU5TVWhFVWdBQUFFSUFBQUFuQ0FZQUFBQzdiWjRCQUFBQUNYQklXWE1BQUFzU0FBQUxFZ0hTM1g3OEFBQUY4VWxFUVZSb2dlMWEyMjRjUlJBOU5lSkRwajhHSHVBSkhpUHVJUWtHRVhBQUIyUkZpcEFpa2poT1RHNk9jN0VoQ2lCTEtGSVVLUUxsWTNZK3hEUEZRM2QxVmZYTzJydnJHUjZRVzFydGJFOVhkWFhWcWVyVGJRTW43YVRaUm1OUEVLNjlaZ2FqdWZqV3duUFYxMTZ6Q0UwdXZqbXFyZFdZeXV2cmZ6T29BMUdIY1AwZlhsU2VxQU5UQzZaMkRQUDhYR01wcmpkZW1ZVnpucXI1L3UyNTVnd2JyMWlrR0F3dzBLeTlNNXE5b3lHQ3FBWFFncWlEb0lMbWpHeTQ4WklaVVo1SmRZUWJMeGRHMWJ4dEZFZUV6UmZNMUFMeVNRdGl0QWliTDQ1Y0RNUElpaU9yK0QxV0d4eHE5YzNuTEprZ3lwa0JvcGdnWUlDSU1MbndidS9jNGVaekJnak1ERW9qck9jSXdPVENlNFBiUFFJaVdxQktLRWhJUUJXZktVV1djVEJUbXRIRzl3WU5rbUpTUE1PdHZ3WlBrVUVkRWJiMm1hb09CQXZsTHVjNDR5QTZwT29RdHZhbkZoTzI5dGs2UUZPa0F5ZzVDS2wvNERhWUkrcXRQNWdOQ2lJQzJvUUF2NkM4eUVJK0k0QmFVQlUva0NKcmFnVlJHOGNQMkFaekJGV0tncHdDQ1FXVUZ5aU9hTkY4YzhybE9Sa25SZWRaVkdoNk1GcWdpblBVdnp3YnpCbHZES0VrM0huS3pESENWTVZDSjg5Z3pzVXVjZ0pnY3Y0am1pVVBRcXlzWUtlUFNML0JERGJGZUloMmJFU0V1M3NNMkx3K2dOMDJMUXEwK0dtcjcrd3lVdDJJaUZMK3dZNkxHRVFZOUlRN2U0T2dZb0RVYUpPUmJUYldWbmpwUS9yZGZQVkpUMHAwY000a0pWSktzYVZQblNydjZydVBqKzJNWTZWR2ZXK0hHUzBJQko4QStzUmdFQ2p1LzErZTlTbHg3MkZra0psM0VFQXBKWkllRDMraEtDWjFCa3FRcFJGUjM5L09CNm9JWjMxMnJOSWd3N1p3ZjVzeldsTHg0NEl2dURRai82NGNWOS9iUGhZcWxuWkVYclFsVGVtM3dOem0rT1NMRlIrNmdqQUp2OGpiSkhXZ2lsMEtvRWdqUzlKUXRhaTM3eTd0aktWU0l6eTRuU0ZOeHBYeHVKZ3FPNUFnejVpc2ZFMVQ4dHdaR3E0eW5CVFpYWUtBdUJPbE1abXVBemwzanBzZ0N5TWk3TnhpSlRtdHFlSmRKa0JDckpBSWxXMzFneVJmV1NTd0lWbUdoRldxeTQ1UkpPZzhncHF3czdVVUtoWlBqV0lMa3kwdjBtZnRrOC9rM0tyZkpRcW02WDlyZW9palFDMmF6MWNwNmovUWR3VlRKZEx4NGVIbXdzNVl5QkhoMFFibkNLQ012anBCeGt6T2Z1dWNVRCs4emxvTGhFSzNPYkprOUluTzV0eDNCQ0IrbHhUZE90TGNmU3h6RnBuYkVmV2puMWs1Z3g2a0xDckVLS282VE02cyticnc2Q3Jic1hKNFlzU0RHVWlwYzZiaFo5ZDZDeXpqUUUreGxyTlVLaHZ0SGRnUjRja1ZkaEVuUzI0Nmh3NmFGWkhLamszeTZRREZGdVpWUHdNRmdPYk1qNVMzWEl0STUyQkZTdjM0eXR6T21HL1hvQTdDZWpoVmVFdHRwRWxmYy9yU1ZCR2ZuRjRmaFBrMG42MVQvZVFubHQxRXlGZytoeGhMRnRsS2poeGE3MTVtZS9scWhTeWJGSzdYZkhwNTlEOFJBRURZdlp5T2RvWmh5cTV0Y0VBQUpuUFlkR2hxMUh1WDJGNit3cVNEWHNpeVkzNy9XVFBNTlc2dEtTM2NmV2Q4WCs5ZE9qSkZEazBOb2s2UHdDaVFrTzRleS83dzZ6cDdtUG83UndDOTZhUWpaejJMclBSMVdaY2dVK3hCT3Q4c1VpMW5RaWI4OWdNakF4NG1DZnFYb2tacUxSRkJxU2xaVzNHNVcrcTMrcXhjNmFMODdmUlJEcFFjNU9SK3BQbjQ2c3oxOXQ4a1AxM2pyQXpJZERjL1o0K3pUa1FhSzRzSVgxMHdmY2t5bzFtZGlrcHZreHVmblRLTllCM0RhRDdjNkoyMFB6V29kWkVCQWVsaXlIayszejVWSmxybS9NRUtpbVQ4dEQ0aWphMDRPNzkzTmlXQlNsZHQvMHlRVjJmNmM0Zmc4NUJjbWZKT2VMYkt0Z2JFQmJGN1Z0dE1YMXBQaVI1cGZkRzBrZTY3VjdCemlaeERaakdQZGFTMXY5VFhmTEExTlpsbmY3K2ZaNzlvOVd6NUxNdUxCb21oOGs3N2FXcVA3OWZWTjY1OFA5M3ZLMGVmM2ZhMzlXdnovbTJuMGFkR0lrNE1oV3llaXFJMU9mcG1URFRDcUNHQ0hMTmg5VWh0eUJleVBhZ3k5VVBHeW51SGd0eXZ1d2NLR2VNS3lDQ3J3eTFkSHNLZkt4Ymh1bmhuaEViT0wxcFpKcGVLalQ3OU52dENnVGkxUWFQdDZwVWhVRzdiWkl1T09PN3dZZ3cwcDdiekFJT0lWaU9Zc2VWSkpabnZza0RwQzcvZEh0a01MYzV6SmowU0RNY1UwNkpMaDBjVWNBeWF6QzlYLzBZdUIyVFUvd3c1YVNmdGY5UCtCWkx2YWlqNTQ4QnZBQUFBQUVsRlRrU3VRbUNDIi8+CiAgPC9nPgo8L3N2Zz4=';
+  buildCharts();
+}
+const gc=()=>isDark?'rgba(255,255,255,.06)':'rgba(0,0,0,.07)';
+const tc=()=>isDark?'#8b93b0':'#5a6280';
+const PAL=['#21a866','#2189bd','#5ec7f5','#6fedb5','#f5b942','#e07b2a','#9b59b6','#e74c3c','#1abc9c','#3498db'];
+
+// ── DATA ─────────────────────────────────────────────────────────────────────
+const MONTHS=['Apr 25','May 25','Jun 25','Jul 25','Aug 25','Sep 25','Oct 25','Nov 25','Dec 25','Jan 26','Feb 26','Mar 26','Apr 26','May 26'];
+const F_TOT=[67,83,153,119,132,173,128,122,39,83,231,216,300,445];
+const F_CLR_BG=['rgba(33,168,102,.75)','rgba(33,168,102,.75)','rgba(33,168,102,.75)','rgba(33,168,102,.75)','rgba(33,168,102,.75)','rgba(33,168,102,.75)','rgba(33,168,102,.75)','rgba(33,168,102,.75)','rgba(33,168,102,.75)','rgba(33,137,189,.75)','rgba(33,137,189,.75)','rgba(33,137,189,.75)','rgba(33,137,189,.75)','rgba(33,137,189,.75)'];
+
+// Daily 2025
+const D25L=[],D25D=[];
+[['4/1',2],['4/2',1],['4/3',2],['4/4',1],['4/5',1],['4/6',0],['4/7',1],['4/8',0],['4/9',1],['4/10',0],['4/11',1],['4/12',0],['4/13',1],['4/14',0],['4/15',2],['4/16',2],['4/17',2],['4/18',1],['4/19',0],['4/20',2],['4/21',43],['4/22',0],['4/23',1],['4/24',0],['4/25',0],['4/26',0],['4/27',0],['4/28',2],['4/29',0],['4/30',1],['5/1',0],['5/2',0],['5/3',2],['5/4',1],['5/5',1],['5/6',0],['5/7',2],['5/8',5],['5/9',4],['5/10',0],['5/11',0],['5/12',31],['5/13',4],['5/14',4],['5/15',2],['5/16',1],['5/17',1],['5/18',1],['5/19',0],['5/20',1],['5/21',1],['5/22',5],['5/23',2],['5/24',2],['5/25',1],['5/26',4],['5/27',1],['5/28',3],['5/29',2],['5/30',0],['5/31',2],['6/1',0],['6/2',5],['6/3',0],['6/4',0],['6/5',1],['6/6',0],['6/7',1],['6/8',1],['6/9',0],['6/10',3],['6/11',2],['6/12',2],['6/13',1],['6/14',3],['6/15',2],['6/16',28],['6/17',1],['6/18',30],['6/19',11],['6/20',3],['6/21',0],['6/22',1],['6/23',0],['6/24',2],['6/25',9],['6/26',0],['6/27',26],['6/28',10],['6/29',9],['6/30',2],['7/1',2],['7/2',0],['7/3',15],['7/4',10],['7/5',3],['7/6',3],['7/7',10],['7/8',6],['7/9',16],['7/10',2],['7/11',7],['7/12',2],['7/13',0],['7/14',5],['7/15',1],['7/16',4],['7/17',2],['7/18',4],['7/19',0],['7/20',3],['7/21',4],['7/22',5],['7/23',5],['7/24',0],['7/25',3],['7/26',0],['7/27',1],['7/28',2],['7/29',2],['7/30',0],['7/31',2],['8/1',3],['8/2',1],['8/3',2],['8/4',9],['8/5',5],['8/6',2],['8/7',1],['8/8',4],['8/9',9],['8/10',7],['8/11',3],['8/12',4],['8/13',5],['8/14',2],['8/15',8],['8/16',6],['8/17',4],['8/18',6],['8/19',7],['8/20',5],['8/21',1],['8/22',6],['8/23',5],['8/24',4],['8/25',2],['8/26',4],['8/27',5],['8/28',4],['8/29',5],['8/30',1],['8/31',2],['9/1',1],['9/2',8],['9/3',5],['9/4',3],['9/5',13],['9/6',9],['9/7',7],['9/8',14],['9/9',7],['9/10',9],['9/11',4],['9/12',6],['9/13',0],['9/14',1],['9/15',5],['9/16',24],['9/17',8],['9/18',7],['9/19',8],['9/20',3],['9/21',2],['9/22',5],['9/23',1],['9/24',2],['9/25',8],['9/26',7],['9/27',1],['9/28',0],['9/29',4],['9/30',1],['10/1',3],['10/2',1],['10/3',0],['10/4',2],['10/5',0],['10/6',1],['10/7',4],['10/8',3],['10/9',5],['10/10',50],['10/11',8],['10/12',2],['10/13',9],['10/14',2],['10/15',1],['10/16',3],['10/17',2],['10/18',3],['10/19',1],['10/20',1],['10/21',1],['10/22',4],['10/23',10],['10/24',0],['10/25',3],['10/26',1],['10/27',0],['10/28',3],['10/29',2],['10/30',1],['10/31',2],['11/1',1],['11/2',3],['11/3',5],['11/4',1],['11/5',6],['11/6',1],['11/7',1],['11/8',3],['11/9',1],['11/10',2],['11/11',1],['11/12',3],['11/13',2],['11/14',19],['11/15',22],['11/16',7],['11/17',7],['11/18',2],['11/19',2],['11/20',4],['11/21',13],['11/22',3],['11/23',1],['11/24',3],['11/25',2],['11/26',1],['11/27',2],['11/28',0],['11/29',1],['11/30',3],['12/1',6],['12/2',1],['12/3',3],['12/4',0],['12/5',0],['12/6',0],['12/7',1],['12/8',4],['12/9',1],['12/10',2],['12/11',0],['12/12',1],['12/13',0],['12/14',2],['12/15',5],['12/16',0],['12/17',1],['12/18',0],['12/19',1],['12/20',0],['12/21',0],['12/22',2],['12/23',2],['12/24',2],['12/25',0],['12/26',0],['12/27',0],['12/28',1],['12/29',0],['12/30',2],['12/31',3]].forEach(d=>{D25L.push(d[0]);D25D.push(Math.max(0,d[1]));});
+
+const D26L=[],D26D=[];
+[['1/1',0],['1/2',3],['1/3',0],['1/4',0],['1/5',0],['1/6',3],['1/7',1],['1/8',22],['1/9',6],['1/10',0],['1/11',2],['1/12',4],['1/13',0],['1/14',1],['1/15',2],['1/16',0],['1/17',3],['1/18',4],['1/19',2],['1/20',6],['1/21',3],['1/22',0],['1/23',1],['1/24',2],['1/25',2],['1/26',0],['1/27',1],['1/28',3],['1/29',5],['1/30',4],['1/31',3],['2/1',2],['2/2',0],['2/3',2],['2/4',2],['2/5',3],['2/6',1],['2/7',2],['2/8',5],['2/9',11],['2/10',0],['2/11',0],['2/12',1],['2/13',2],['2/14',2],['2/15',0],['2/16',13],['2/17',42],['2/18',80],['2/19',16],['2/20',3],['2/21',1],['2/22',2],['2/23',3],['2/24',2],['2/25',3],['2/26',19],['2/27',9],['2/28',6],['3/1',3],['3/2',3],['3/3',2],['3/4',2],['3/5',2],['3/6',0],['3/7',0],['3/8',5],['3/9',3],['3/10',1],['3/11',1],['3/12',3],['3/13',7],['3/14',2],['3/15',0],['3/16',94],['3/17',59],['3/18',10],['3/19',1],['3/20',4],['3/21',2],['3/22',1],['3/23',2],['3/24',2],['3/25',3],['3/26',1],['3/27',0],['3/28',0],['3/29',0],['3/30',1],['3/31',3],['4/1',1],['4/2',20],['4/3',36],['4/4',10],['4/5',4],['4/6',4],['4/7',1],['4/8',34],['4/9',87],['4/10',10],['4/11',1],['4/12',25],['4/13',37],['4/14',12],['4/15',1],['4/16',1],['4/17',4],['4/18',1],['4/19',4],['4/20',5],['4/21',3],['4/22',0],['4/23',0],['4/24',0],['4/25',0],['4/26',0],['4/27',2],['4/28',0],['4/29',0],['4/30',0],['5/1',4],['5/2',1],['5/3',1],['5/4',1],['5/5',5],['5/6',7],['5/7',4],['5/8',3],['5/9',3],['5/10',18],['5/11',66],['5/12',16],['5/13',11],['5/14',1],['5/15',2],['5/16',2],['5/17',0],['5/18',1],['5/19',1],['5/20',3],['5/21',1],['5/22',110],['5/23',71],['5/24',66],['5/25',42],['5/26',1],['5/27',1],['5/28',0],['5/29',2],['5/30',3],['5/31',0],['6/1',0],['6/2',0],['6/3',2],['6/4',1],['6/5',0],['6/6',1],['6/7',1],['6/8',1]].forEach(d=>{D26L.push(d[0]);D26D.push(Math.max(0,d[1]));});
+
+// Follower audience
+const F_SEN_L=['Senior','Entry','Manager','Director','Training','VP','Owner','CXO','Partner'];
+const F_SEN_D=[802,791,106,103,45,42,27,18,6];
+const F_CS_L=['10,001+','51–200','1,001–5K','11–50','201–500','501–1K','5K–10K','2–10'];
+const F_CS_D=[457,335,277,206,190,134,95,87];
+const F_LOC=[{l:'Greater Chennai Area, India',v:840,p:39.9},{l:'Greater Bengaluru Area, India',v:268,p:12.7},{l:'Greater Delhi Area, India',v:186,p:8.8},{l:'Greater Hyderabad Area, India',v:124,p:5.9},{l:'Mumbai Metropolitan Region, India',v:98,p:4.7},{l:'Pune/Pimpri-Chinchwad Area, India',v:76,p:3.6},{l:'Greater Coimbatore Area, India',v:62,p:2.9},{l:'Noida, India',v:45,p:2.1},{l:'Greater Kolkata Area, India',v:42,p:2.0},{l:'Greater Madurai Area, India',v:22,p:1.0}];
+
+// Visitor data
+const V_MONTHS=['Jun 25','Jul 25','Aug 25','Sep 25','Oct 25','Nov 25','Dec 25','Jan 26','Feb 26','Mar 26','Apr 26','May 26'];
+const V_PV=[734,1028,954,1545,1200,1451,803,1069,1078,1377,1902,1718];
+const V_UV=[277,397,385,553,475,557,318,386,383,485,631,665];
+const V_IND_L=['IT Services & IT Consulting','E-Learning Providers','Software Development','Technology & Internet','Design Services','Education','Animation & Post-prod.','Graphic Design','HR Services','Edu Admin Programs'];
+const V_IND_D=[4350,3467,1370,969,586,532,415,390,301,291];
+const V_JOB_L=['Arts & Design','Education','Engineering','Human Resources','IT','Business Dev','Media & Comm.','Marketing','Operations','Project Mgmt'];
+const V_JOB_D=[2275,2043,1748,1178,896,849,593,491,490,459];
+const V_SEN_L=['Senior','Entry','Manager','Training','Director','CXO','VP','Owner'];
+const V_SEN_D=[5566,5239,850,677,416,235,186,171];
+const V_CS_L=['51–200','10,001+','11–50','1,001–5K','501–1K','201–500','2–10','5K–10K'];
+const V_CS_D=[2746,2656,1956,1583,1433,1037,728,512];
+const V_LOC=[{l:'Greater Chennai Area, India',v:8114,p:54.2},{l:'Greater Bengaluru Area, India',v:2238,p:14.9},{l:'Greater Delhi Area, India',v:997,p:6.7},{l:'Greater Hyderabad Area, India',v:751,p:5.0},{l:'Mumbai Metropolitan Region, India',v:508,p:3.4},{l:'Pune/Pimpri-Chinchwad Area, India',v:496,p:3.3},{l:'Greater Coimbatore Area, India',v:367,p:2.5},{l:'Austin, Texas Metro Area',v:220,p:1.5},{l:'Greater Madurai Area, India',v:218,p:1.5},{l:'Noida, India',v:192,p:1.3}];
+
+// Content
+const C_MONTHS=['Jun 25','Jul 25','Aug 25','Sep 25','Oct 25','Nov 25','Dec 25','Jan 26','Feb 26','Mar 26','Apr 26','May 26'];
+const C_IMP=[4165,3711,3436,8039,23564,11221,5792,19061,17664,43580,75799,36526];
+const C_ENG=[575,321,279,1091,994,687,484,1999,1747,1288,1317,1702];
+const C_POST_TYPE_L=['Welcome aboard','Thought Leadership','Employer Branding','Wishes','Employee Milestone','Job Opening'];
+const C_POST_ENG_R=[8.6,7.4,14.1,12.7,12.6,10.2];
+const C_POST_IMP=[29245,28736,17982,11671,11007,4407];
+const C_MEDIA_L=['Image','Video','Text only'];
+const C_MEDIA_IMP=[56704,26998,21804];
+const C_MEDIA_CNT=[39,19,21];
+const C_VOL_L=['Welcome aboard','Thought Leadership','Image Others','Text Posts','Video Posts','Job Opening','Employee Milestone','Wishes'];
+const C_VOL_D=[22,25,0,21,19,6,8,8];
+
+// Top posts
+const TOP_POSTS=[
+  {date:'3/13/2025',type:'Employer Branding',media:'Image',impr:3802,eng:519,react:188},
+  {date:'9/8/2025',type:'Employer Branding',media:'Video',impr:3430,eng:583,react:72},
+  {date:'4/4/2025',type:'Employer Branding',media:'Image',impr:3414,eng:361,react:117},
+  {date:'1/23/2026',type:'Thought Leadership',media:'Text',impr:4718,eng:47,react:15},
+  {date:'10/19/2025',type:'Wishes',media:'Video',impr:2085,eng:109,react:45},
+  {date:'1/27/2026',type:'Welcome aboard',media:'Image',impr:2251,eng:242,react:49},
+  {date:'6/23/2025',type:'Wishes',media:'Image',impr:1867,eng:452,react:42},
+  {date:'1/30/2026',type:'Employer Branding',media:'Video',impr:1820,eng:403,react:64},
+  {date:'2/5/2026',type:'Employee Milestone',media:'Image',impr:1999,eng:204,react:78},
+  {date:'11/5/2025',type:'Welcome aboard',media:'Image',impr:1807,eng:170,react:84},
+];
+
+// Competitors
+const COMP=[
+  {n:'Novac Technology',f:60159,p:275,c:144,r:20478},
+  {n:'GP Strategies',f:42969,p:373,c:212,r:8943},
+  {n:'Infopro Learning',f:16210,p:486,c:224,r:7448},
+  {n:'ELB Learning',f:2958,p:552,c:225,r:4077},
+  {n:'Mediant Labs ✦',f:2129,p:108,c:145,r:3263,highlight:true},
+  {n:'Learning Tech Group',f:717,p:8,c:0,r:0},
+];
+
+// ── BUILD TABLES ──────────────────────────────────────────────────────────────
+function buildTables(){
+  // Follower locations
+  const fl=document.getElementById('fLocTable');
+  if(fl&&!fl.innerHTML){
+    const tot=F_LOC.reduce((a,b)=>a+b.v,0);
+    F_LOC.forEach((d,i)=>{const rc=i===0?'r1':i===1?'r2':i===2?'r3':'rn';fl.innerHTML+=`<tr><td><span class="rnk ${rc}">${i+1}</span></td><td>${d.l}</td><td><strong>${d.v.toLocaleString()}</strong></td><td>${d.p}%</td><td><div class="barc"><div class="mbar" style="width:${d.p*1.8}px"></div><span class="pct">${d.p}%</span></div></td></tr>`;});
+  }
+  // Visitor locations
+  const vl=document.getElementById('vLocTable');
+  if(vl&&!vl.innerHTML){
+    const tot=V_LOC.reduce((a,b)=>a+b.v,0);
+    V_LOC.forEach((d,i)=>{const rc=i===0?'r1':i===1?'r2':i===2?'r3':'rn';const flag=d.l.includes('Austin')?'🇺🇸 ':'';vl.innerHTML+=`<tr><td><span class="rnk ${rc}">${i+1}</span></td><td>${flag}${d.l}</td><td><strong>${d.v.toLocaleString()}</strong></td><td>${d.p}%</td><td><div class="barc"><div class="mbar blue" style="width:${d.p*1.2}px"></div><span class="pct">${d.p}%</span></div></td></tr>`;});
+  }
+  // Top posts
+  const tp=document.getElementById('topPostsTable');
+  if(tp&&!tp.innerHTML){
+    const typeClass={'Employer Branding':'pt-eb','Thought Leadership':'pt-tl','Welcome aboard':'pt-wa','Employee Milestone':'pt-em','Job Opening':'pt-jo','Wishes':'pt-wi'};
+    TOP_POSTS.forEach((p,i)=>{const rc=i===0?'r1':i===1?'r2':i===2?'r3':'rn';const er=(p.eng/p.impr*100).toFixed(1);tp.innerHTML+=`<tr><td><span class="rnk ${rc}">${i+1}</span></td><td>${p.date}</td><td><span class="ptype ${typeClass[p.type]||''}">${p.type}</span></td><td>${p.media}</td><td><strong>${p.impr.toLocaleString()}</strong></td><td>${p.eng}</td><td>${p.react}</td><td>${er}%</td></tr>`;});
+  }
+  // Competitor table
+  const ct=document.getElementById('compTable');
+  if(ct&&!ct.innerHTML){
+    COMP.forEach((c,i)=>{const rc=i===0?'r1':i===1?'r2':i===2?'r3':'rn';const fpp=(c.f/Math.max(c.p,1)).toFixed(1);const rpp=(c.r/Math.max(c.p,1)).toFixed(1);const hl=c.highlight?'style="background:rgba(33,168,102,.05)"':'';ct.innerHTML+=`<tr ${hl}><td><span class="rnk ${rc}">${i+1}</span></td><td><strong>${c.n}</strong></td><td>${c.f.toLocaleString()}</td><td>${c.p}</td><td>${c.c}</td><td>${c.r.toLocaleString()}</td><td>${fpp}</td><td>${rpp}</td></tr>`;});
+  }
+}
+
+// ── CHARTS ────────────────────────────────────────────────────────────────────
+const CI={};
+function mk(id,cfg){if(!document.getElementById(id))return;if(CI[id])CI[id].destroy();CI[id]=new Chart(document.getElementById(id),cfg);}
+Chart.defaults.font.family="'Segoe UI',sans-serif";
+
+function buildCharts(){
+  const g=gc(),t=tc();
+  const axOpts=(yLabel)=>({x:{grid:{color:g},ticks:{color:t,font:{size:10}}},y:{grid:{color:g},ticks:{color:t,font:{size:10}},title:yLabel?{display:true,text:yLabel,color:t,font:{size:10}}:{}}});
+  const yAxOpts=()=>({x:{grid:{color:g},ticks:{color:t,font:{size:10}}},y:{grid:{color:g},ticks:{color:t,font:{size:10}}}});
+  const noLeg={legend:{display:false}};
+
+  // ─ FOLLOWERS
+  mk('monthlyFollowersChart',{type:'bar',data:{labels:MONTHS,datasets:[{label:'New Followers',data:F_TOT,backgroundColor:F_CLR_BG,borderColor:F_CLR_BG.map(c=>c.replace('.75','')),borderWidth:2,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{...noLeg},scales:axOpts()}});
+  mk('daily2025Chart',{type:'line',data:{labels:D25L,datasets:[{label:'Daily',data:D25D,borderColor:'#21a866',backgroundColor:'rgba(33,168,102,.1)',borderWidth:1.5,fill:true,pointRadius:0,pointHoverRadius:4,tension:.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{...noLeg},scales:{x:{grid:{color:g},ticks:{color:t,font:{size:8},maxTicksLimit:10}},y:{grid:{color:g},ticks:{color:t,font:{size:10}}}}}});
+  mk('daily2026Chart',{type:'line',data:{labels:D26L,datasets:[{label:'Daily',data:D26D,borderColor:'#2189bd',backgroundColor:'rgba(33,137,189,.1)',borderWidth:1.5,fill:true,pointRadius:0,pointHoverRadius:4,tension:.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{...noLeg},scales:{x:{grid:{color:g},ticks:{color:t,font:{size:8},maxTicksLimit:10}},y:{grid:{color:g},ticks:{color:t,font:{size:10}}}}}});
+  mk('fSeniorityChart',{type:'doughnut',data:{labels:F_SEN_L,datasets:[{data:F_SEN_D,backgroundColor:PAL,borderWidth:2,borderColor:isDark?'#181c27':'#fff'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{position:'right',labels:{color:t,boxWidth:9,font:{size:10},padding:6}}}}});
+  mk('fCsizeChart',{type:'doughnut',data:{labels:F_CS_L,datasets:[{data:F_CS_D,backgroundColor:PAL,borderWidth:2,borderColor:isDark?'#181c27':'#fff'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{position:'right',labels:{color:t,boxWidth:9,font:{size:10},padding:6}}}}});
+
+  // ─ VISITORS
+  mk('vMonthlyChart',{type:'bar',data:{labels:V_MONTHS,datasets:[{label:'Page Views',data:V_PV,backgroundColor:'rgba(33,137,189,.7)',borderColor:'#2189bd',borderWidth:1.5,borderRadius:5,yAxisID:'y'},{label:'Unique Visitors',data:V_UV,type:'line',borderColor:'#21a866',backgroundColor:'rgba(33,168,102,.1)',borderWidth:2,pointRadius:3,tension:.4,fill:false,yAxisID:'y1'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:t,font:{size:10}}}},scales:{x:{grid:{color:g},ticks:{color:t,font:{size:10}}},y:{grid:{color:g},ticks:{color:t,font:{size:10}},position:'left'},y1:{grid:{drawOnChartArea:false},ticks:{color:t,font:{size:10}},position:'right'}}}});
+  mk('vIndustryChart',{type:'bar',data:{labels:V_IND_L,datasets:[{label:'Views',data:V_IND_D,backgroundColor:'rgba(33,137,189,.7)',borderColor:'#2189bd',borderWidth:1.5,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{...noLeg},scales:{x:{grid:{color:g},ticks:{color:t,font:{size:10}}},y:{grid:{color:g},ticks:{color:t,font:{size:9}}}}}});
+  mk('vJobChart',{type:'bar',data:{labels:V_JOB_L,datasets:[{label:'Views',data:V_JOB_D,backgroundColor:'rgba(33,168,102,.7)',borderColor:'#21a866',borderWidth:1.5,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{...noLeg},scales:{x:{grid:{color:g},ticks:{color:t,font:{size:10}}},y:{grid:{color:g},ticks:{color:t,font:{size:9}}}}}});
+  mk('vSeniorityChart',{type:'polarArea',data:{labels:V_SEN_L,datasets:[{data:V_SEN_D,backgroundColor:PAL.map(c=>c+'cc'),borderWidth:1.5,borderColor:PAL}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:t,boxWidth:9,font:{size:10},padding:5}}},scales:{r:{grid:{color:g},ticks:{color:t,backdropColor:'transparent',font:{size:8}}}}}});
+  mk('vCsizeChart',{type:'bar',data:{labels:V_CS_L,datasets:[{label:'Views',data:V_CS_D,backgroundColor:'rgba(155,89,182,.7)',borderColor:'#9b59b6',borderWidth:1.5,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{...noLeg},scales:{x:{grid:{color:g},ticks:{color:t,font:{size:9}}},y:{grid:{color:g},ticks:{color:t,font:{size:10}}}}}});
+
+  // ─ CONTENT
+  mk('cMonthlyChart',{type:'bar',data:{labels:C_MONTHS,datasets:[{label:'Impressions',data:C_IMP,backgroundColor:'rgba(33,137,189,.7)',borderColor:'#2189bd',borderWidth:1.5,borderRadius:5,yAxisID:'y'},{label:'Reactions+Clicks',data:C_ENG,type:'line',borderColor:'#21a866',backgroundColor:'rgba(33,168,102,.1)',borderWidth:2,pointRadius:3,tension:.4,fill:false,yAxisID:'y1'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:t,font:{size:10}}}},scales:{x:{grid:{color:g},ticks:{color:t,font:{size:10}}},y:{grid:{color:g},ticks:{color:t,font:{size:10}},position:'left'},y1:{grid:{drawOnChartArea:false},ticks:{color:t,font:{size:10}},position:'right'}}}});
+  mk('cPostTypeEngChart',{type:'bar',data:{labels:C_POST_TYPE_L,datasets:[{label:'Engagement Rate %',data:C_POST_ENG_R,backgroundColor:PAL,borderWidth:1.5,borderRadius:5}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{...noLeg},scales:{x:{grid:{color:g},ticks:{color:t,font:{size:10}},max:16},y:{grid:{color:g},ticks:{color:t,font:{size:10}}}}}});
+  mk('cPostTypeImpChart',{type:'bar',data:{labels:C_POST_TYPE_L,datasets:[{label:'Total Impressions',data:C_POST_IMP,backgroundColor:PAL,borderWidth:1.5,borderRadius:5}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{...noLeg},scales:{x:{grid:{color:g},ticks:{color:t,font:{size:10}}},y:{grid:{color:g},ticks:{color:t,font:{size:10}}}}}});
+  mk('cMediaChart',{type:'bar',data:{labels:C_MEDIA_L,datasets:[{label:'Total Impressions',data:C_MEDIA_IMP,backgroundColor:['rgba(33,137,189,.8)','rgba(33,168,102,.8)','rgba(155,89,182,.8)'],borderWidth:1.5,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{...noLeg},scales:{x:{grid:{color:g},ticks:{color:t}},y:{grid:{color:g},ticks:{color:t}}}}});
+  mk('cPostVolChart',{type:'doughnut',data:{labels:['Image Posts','Thought Leadership TL','Job Opening','Employee Milestone','Wishes','Text Posts','Video Posts'],datasets:[{data:[39,25,6,8,8,21,19],backgroundColor:PAL,borderWidth:2,borderColor:isDark?'#181c27':'#fff'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'50%',plugins:{legend:{position:'right',labels:{color:t,boxWidth:9,font:{size:10},padding:5}}}}});
+
+  // ─ MEDIA TYPE DEEP DIVE
+  const MEDIA_LABELS=['Video','Image','Text','Article'];
+  const MEDIA_AVG_IMPR=[1693,1453,1038,541];
+  const MEDIA_ENG_RATE=[13.02,10.7,4.9,5.51];
+  const MEDIA_COLORS=['rgba(33,168,102,.8)','rgba(33,137,189,.8)','rgba(155,89,182,.8)','rgba(224,123,42,.8)'];
+  const MEDIA_BORDER=['#21a866','#2189bd','#9b59b6','#e07b2a'];
+
+  mk('mediaAvgImprChart',{type:'bar',data:{labels:MEDIA_LABELS,datasets:[{label:'Avg Impressions/Post',data:MEDIA_AVG_IMPR,backgroundColor:MEDIA_COLORS,borderColor:MEDIA_BORDER,borderWidth:2,borderRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{...noLeg,tooltip:{callbacks:{label:c=>' '+c.parsed.y.toLocaleString()+' avg impressions'}}},scales:{x:{grid:{color:g},ticks:{color:t}},y:{grid:{color:g},ticks:{color:t}}}}});
+
+  mk('mediaEngRateChart',{type:'bar',data:{labels:MEDIA_LABELS,datasets:[{label:'Avg Eng. Rate %',data:MEDIA_ENG_RATE,backgroundColor:MEDIA_COLORS,borderColor:MEDIA_BORDER,borderWidth:2,borderRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{...noLeg,tooltip:{callbacks:{label:c=>c.parsed.y.toFixed(1)+'% engagement rate'}}},scales:{x:{grid:{color:g},ticks:{color:t}},y:{grid:{color:g},ticks:{color:t},max:16}}}});
+
+  const STACK_MONTHS=['Jun25','Jul25','Aug25','Sep25','Oct25','Nov25','Dec25','Jan26','Feb26','Mar26','Apr26','May26'];
+  mk('mediaStackedChart',{type:'bar',data:{labels:STACK_MONTHS,datasets:[
+    {label:'Video',data:[1608,1796,1802,5019,5555,0,2027,4841,0,2394,0,2053],backgroundColor:'rgba(33,168,102,.75)',borderRadius:4},
+    {label:'Image / Text',data:[5046,3823,917,4290,9019,10405,2764,16417,16561,9670,13928,12671],backgroundColor:'rgba(33,137,189,.75)',borderRadius:4},
+    {label:'Article',data:[0,0,0,0,0,0,0,0,0,0,1760,581],backgroundColor:'rgba(224,123,42,.75)',borderRadius:4}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:t,boxWidth:9,font:{size:10}}}},scales:{x:{stacked:true,grid:{color:g},ticks:{color:t,font:{size:9}}},y:{stacked:true,grid:{color:g},ticks:{color:t}}}}});
+
+  mk('mediaEfficiencyChart',{type:'bar',data:{labels:MEDIA_LABELS,datasets:[
+    {label:'Post Count',data:[16,39,21,5],backgroundColor:MEDIA_COLORS.map(c=>c.replace('.8','.4')),borderColor:MEDIA_BORDER,borderWidth:1.5,borderRadius:5,yAxisID:'y'},
+    {label:'Total Impressions',data:[27095,56704,21804,2706],backgroundColor:MEDIA_COLORS,borderColor:MEDIA_BORDER,borderWidth:2,borderRadius:5,yAxisID:'y1'}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:t,boxWidth:9,font:{size:10}}}},scales:{x:{grid:{color:g},ticks:{color:t}},y:{grid:{color:g},ticks:{color:t},position:'left',title:{display:true,text:'Post Count',color:t,font:{size:9}}},y1:{grid:{drawOnChartArea:false},ticks:{color:t},position:'right',title:{display:true,text:'Total Impressions',color:t,font:{size:9}}}}}});
+
+  mk('cMediaClicksChart',{type:'bar',data:{labels:['Video','Image / Text','Article'],datasets:[{label:'Avg Clicks/Post',data:[182,68,17],backgroundColor:['rgba(33,168,102,.8)','rgba(33,137,189,.8)','rgba(224,123,42,.8)'],borderColor:['#21a866','#2189bd','#e07b2a'],borderWidth:2,borderRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{...noLeg},scales:{x:{grid:{color:g},ticks:{color:t}},y:{grid:{color:g},ticks:{color:t}}}}});
+
+  // ─ COMPETITORS
+  const compNames=COMP.map(c=>c.n);
+  const compColors=COMP.map(c=>c.highlight?'rgba(33,168,102,.8)':'rgba(33,137,189,.6)');
+  const compBorder=COMP.map(c=>c.highlight?'#21a866':'#2189bd');
+  mk('compFollowersChart',{type:'bar',data:{labels:compNames,datasets:[{label:'New Followers',data:COMP.map(c=>c.f),backgroundColor:compColors,borderColor:compBorder,borderWidth:2,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{...noLeg},scales:{x:{grid:{color:g},ticks:{color:t,font:{size:9}}},y:{grid:{color:g},ticks:{color:t}}}}});
+  mk('compReactionsChart',{type:'bar',data:{labels:compNames,datasets:[{label:'Total Reactions',data:COMP.map(c=>c.r),backgroundColor:compColors,borderColor:compBorder,borderWidth:2,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{...noLeg},scales:{x:{grid:{color:g},ticks:{color:t,font:{size:9}}},y:{grid:{color:g},ticks:{color:t}}}}});
+  mk('compPostsChart',{type:'bar',data:{labels:compNames,datasets:[{label:'Posts Published',data:COMP.map(c=>c.p),backgroundColor:compColors,borderColor:compBorder,borderWidth:2,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{...noLeg},scales:{x:{grid:{color:g},ticks:{color:t,font:{size:9}}},y:{grid:{color:g},ticks:{color:t}}}}});
+  mk('compCommentsChart',{type:'bar',data:{labels:compNames,datasets:[{label:'Total Comments',data:COMP.map(c=>c.c),backgroundColor:compColors,borderColor:compBorder,borderWidth:2,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{...noLeg},scales:{x:{grid:{color:g},ticks:{color:t,font:{size:9}}},y:{grid:{color:g},ticks:{color:t}}}}});
+}
+
+buildTables();
+buildCharts();
+
+// Ad campaign charts
+function buildAdsCharts(){
+  const g=gc(),t=tc();
+  const noLeg={legend:{display:false}};
+  // ─ AD CAMPAIGNS
+  const ADS_CAMP=['Pilot Oct 25','ML Boost Video','HASQ TOF Apr 26','HASQ MOF May 26','Boost May 26'];
+  const ADS_SPEND=[100,149.55,499.97,699.98,150];
+  const ADS_IMPR=[11349,79406,7344,12270,5766];
+  const ADS_COLORS=['rgba(139,147,176,.8)','rgba(155,89,182,.8)','rgba(33,168,102,.8)','rgba(33,137,189,.8)','rgba(224,123,42,.8)'];
+  const ADS_BORDER=['#8b93b0','#9b59b6','#21a866','#2189bd','#e07b2a'];
+
+  mk('adSpendChart',{type:'doughnut',data:{labels:ADS_CAMP,datasets:[{data:ADS_SPEND,backgroundColor:ADS_COLORS,borderColor:ADS_BORDER,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{position:'right',labels:{color:t,boxWidth:9,font:{size:10},padding:6}},tooltip:{callbacks:{label:c=>' $'+c.parsed.toFixed(2)+' ('+((c.parsed/1499.5)*100).toFixed(1)+'%)'}}}}});
+  mk('adImprChart',{type:'bar',data:{labels:ADS_CAMP,datasets:[{label:'Impressions',data:ADS_IMPR,backgroundColor:ADS_COLORS,borderColor:ADS_BORDER,borderWidth:2,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{...noLeg},scales:{x:{grid:{color:g},ticks:{color:t,font:{size:9}}},y:{grid:{color:g},ticks:{color:t}}}}});
+
+  mk('hasqCTRChart',{type:'bar',data:{labels:['TOF Set 01','TOF Set 02','MOF Set 01','MOF Set 02'],datasets:[{label:'CTR %',data:[0.285,0.287,0.259,0.428],backgroundColor:['rgba(33,168,102,.6)','rgba(33,168,102,.8)','rgba(33,137,189,.6)','rgba(33,137,189,.9)'],borderColor:['#21a866','#21a866','#2189bd','#2189bd'],borderWidth:2,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{...noLeg,annotation:{annotations:[{type:'line',yMin:0.3,yMax:0.3,borderColor:'rgba(255,196,0,.5)',borderWidth:1,borderDash:[4,4]}]}},scales:{x:{grid:{color:g},ticks:{color:t}},y:{grid:{color:g},ticks:{color:t},max:0.55}}}});
+
+  mk('videoFunnelChart',{type:'bar',data:{labels:['Impressions','Video Plays','Views (25%)','Views (50%)','Views (75%)','Completions'],datasets:[{label:'Count',data:[79406,64967,20499,16869,12735,12735],backgroundColor:['rgba(155,89,182,.5)','rgba(155,89,182,.7)','rgba(33,168,102,.9)','rgba(33,168,102,.8)','rgba(33,168,102,.7)','rgba(33,168,102,.6)'],borderWidth:1.5,borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{...noLeg},scales:{x:{grid:{color:g},ticks:{color:t,font:{size:9}}},y:{grid:{color:g},ticks:{color:t}}}}});
+
+  mk('adIndChart',{type:'bar',data:{labels:['Tech & Internet','IT Services','Business Consulting','Transport Mfg','Engineering Svcs','Media & Telecom','Machinery Mfg','Higher Education'],datasets:[{label:'Impressions',data:[48369,34473,16460,10334,9019,8468,7976,6451],backgroundColor:'rgba(33,137,189,.7)',borderColor:'#2189bd',borderWidth:1.5,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{...noLeg},scales:{x:{grid:{color:g},ticks:{color:t,font:{size:10}}},y:{grid:{color:g},ticks:{color:t,font:{size:9}}}}}});
+
+  mk('adJobChart',{type:'bar',data:{labels:['Engineering','Business Dev','IT','Operations','Sales','Proj. Mgmt','Education'],datasets:[{label:'Impressions',data:[23858,22873,22748,16933,14211,7046,5967],backgroundColor:'rgba(33,168,102,.7)',borderColor:'#21a866',borderWidth:1.5,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{...noLeg},scales:{x:{grid:{color:g},ticks:{color:t,font:{size:10}}},y:{grid:{color:g},ticks:{color:t,font:{size:9}}}}}});
+
+  mk('adSenChart',{type:'doughnut',data:{labels:['Senior','Director','Manager','Owner','VP','CXO','Others'],datasets:[{data:[53152,17674,15591,9382,8854,7525,10000],backgroundColor:PAL,borderWidth:2,borderColor:isDark?'#181c27':'#fff'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{position:'right',labels:{color:t,boxWidth:9,font:{size:10},padding:5}}}}});
+
+  mk('adLocChart',{type:'bar',data:{labels:['United States','Canada','Greater Toronto','New York City','Others'],datasets:[{label:'Impressions',data:[86098,29833,9343,7293,57535],backgroundColor:['rgba(33,137,189,.9)','rgba(33,137,189,.7)','rgba(33,168,102,.8)','rgba(33,168,102,.6)','rgba(139,147,176,.5)'],borderWidth:2,borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{...noLeg},scales:{x:{grid:{color:g},ticks:{color:t,font:{size:9}}},y:{grid:{color:g},ticks:{color:t}}}}});
+
+  // Ad Titles Table
+  const titleData=[['Owner',4117,12.0,0],['Founder',3134,9.1,0],['President',2962,8.6,0],['Chief Executive Officer',2351,6.8,0],['Senior Software Engineer',2247,6.5,0],['Co-Founder',1672,4.9,0],['IT Specialist',1583,4.6,0],['Director',1338,3.9,0],['Vice President',1120,3.3,0],['Chief Technology Officer',987,2.9,0]];
+  const tt=document.getElementById('adTitlesTable');
+  if(tt&&!tt.innerHTML){
+    titleData.forEach((d,i)=>{const rc=i===0?'r1':i===1?'r2':i===2?'r3':'rn';tt.innerHTML+=`<tr><td><span class="rnk ${rc}">${i+1}</span></td><td>${d[0]}</td><td><strong>${d[2].toLocaleString()+'K'}</strong></td><td>${d[1]}%</td><td>${d[3]}</td><td><div class="barc"><div class="mbar" style="width:${d[1]*1.5}px"></div><span class="pct">${d[1]}%</span></div></td></tr>`;});
+  }
+}
+
+</script>
+</body>
+</html>
