@@ -254,6 +254,12 @@ footer span{color:var(--g);}
     <div class="card"><h3>Monthly Impressions & Engagement</h3><p class="csub">Impressions (bars) vs Reactions + Clicks combined (line) · Apr spike driven by viral Employer Branding</p><div class="cht h4"><canvas id="cMonthlyChart"></canvas></div></div>
   </div>
 
+  <div class="sec">Post Cadence</div>
+  <div class="row c2">
+    <div class="card"><h3>Posts Published per Month</h3><p class="csub">Aug 2025 – Jul 2026 · based on granular post-level export</p><div class="cht h2"><canvas id="postsPerMonthChart"></canvas></div></div>
+    <div class="card"><h3>Post Type per Month</h3><p class="csub">Video / Image-Text / Article mix, Aug 2025 – Jul 2026</p><div class="cht h2"><canvas id="postsTypePerMonthChart"></canvas></div></div>
+  </div>
+
   <!-- ══ MEDIA TYPE DEEP DIVE ══ -->
   <div class="sec">Media Type — Engagement Deep Dive</div>
 
@@ -781,6 +787,15 @@ function buildCharts(){
 
   // ─ CONTENT
   mk('cMonthlyChart',{type:'bar',data:{labels:C_MONTHS,datasets:[{label:'Impressions',data:C_IMP,backgroundColor:'rgba(33,137,189,.7)',borderColor:'#2189bd',borderWidth:1.5,borderRadius:5,yAxisID:'y'},{label:'Reactions+Clicks',data:C_ENG,type:'line',borderColor:'#21a866',backgroundColor:'rgba(33,168,102,.1)',borderWidth:2,pointRadius:3,tension:.4,fill:false,yAxisID:'y1'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:t,font:{size:10}}}},scales:{x:{grid:{color:g},ticks:{color:t,font:{size:10}}},y:{grid:{color:g},ticks:{color:t,font:{size:10}},position:'left'},y1:{grid:{drawOnChartArea:false},ticks:{color:t,font:{size:10}},position:'right'}}}});
+
+  const PC_MONTHS=['Aug 25','Sep 25','Oct 25','Nov 25','Dec 25','Jan 26','Feb 26','Mar 26','Apr 26','May 26','Jun 26','Jul 26*'];
+  const PC_COUNT=[2,3,9,3,2,12,16,11,23,18,15,8];
+  mk('postsPerMonthChart',{type:'bar',data:{labels:PC_MONTHS,datasets:[{label:'Posts',data:PC_COUNT,backgroundColor:'rgba(33,168,102,.75)',borderColor:'#21a866',borderWidth:2,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{...noLeg},scales:{x:{grid:{color:g},ticks:{color:t,font:{size:9}}},y:{grid:{color:g},ticks:{color:t,stepSize:2}}}}});
+  mk('postsTypePerMonthChart',{type:'bar',data:{labels:PC_MONTHS,datasets:[
+    {label:'Image/Text',data:[1,1,2,3,1,9,14,9,20,15,10,8],backgroundColor:'rgba(33,137,189,.8)',borderRadius:4,stack:'s'},
+    {label:'Video',data:[1,2,7,0,1,3,2,2,0,2,1,0],backgroundColor:'rgba(224,123,42,.8)',borderRadius:4,stack:'s'},
+    {label:'Article',data:[0,0,0,0,0,0,0,0,3,1,4,0],backgroundColor:'rgba(155,89,182,.8)',borderRadius:4,stack:'s'}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:t,boxWidth:9,font:{size:9}}}},scales:{x:{stacked:true,grid:{color:g},ticks:{color:t,font:{size:9}}},y:{stacked:true,grid:{color:g},ticks:{color:t,stepSize:2}}}}});
   mk('cPostTypeEngChart',{type:'bar',data:{labels:C_POST_TYPE_L,datasets:[{label:'Engagement Rate %',data:C_POST_ENG_R,backgroundColor:PAL,borderWidth:1.5,borderRadius:5}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{...noLeg},scales:{x:{grid:{color:g},ticks:{color:t,font:{size:10}},max:16},y:{grid:{color:g},ticks:{color:t,font:{size:10}}}}}});
   mk('cPostTypeImpChart',{type:'bar',data:{labels:C_POST_TYPE_L,datasets:[{label:'Total Impressions',data:C_POST_IMP,backgroundColor:PAL,borderWidth:1.5,borderRadius:5}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{...noLeg},scales:{x:{grid:{color:g},ticks:{color:t,font:{size:10}}},y:{grid:{color:g},ticks:{color:t,font:{size:10}}}}}});
   mk('cMediaChart',{type:'bar',data:{labels:C_MEDIA_L,datasets:[{label:'Total Impressions',data:C_MEDIA_IMP,backgroundColor:['rgba(33,137,189,.8)','rgba(33,168,102,.8)','rgba(155,89,182,.8)'],borderWidth:1.5,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{...noLeg},scales:{x:{grid:{color:g},ticks:{color:t}},y:{grid:{color:g},ticks:{color:t}}}}});
